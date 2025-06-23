@@ -1,0 +1,13 @@
+version: '2'
+linters:
+  settings:
+    govet:
+      disable:
+        - structtag # participle uses nonconventional tags
+formatters:
+  enable:
+    - gofumpt
+  settings:
+    gofumpt:
+      module-path: github.com/armsnyder/gdshader-language-server
+      extra-rules: true
