@@ -11,7 +11,7 @@ type Handler struct {
 	isUTF8 bool
 }
 
-func (h *Handler) Initialize(clientCapabilities *lsp.ClientCapabilities) (*lsp.ServerCapabilities, error) {
+func (h *Handler) Initialize(clientCapabilities lsp.ClientCapabilities) (*lsp.ServerCapabilities, error) {
 	var serverCapabilities lsp.ServerCapabilities
 	serverCapabilities.TextDocumentSync.OpenClose = true
 

@@ -29,7 +29,7 @@ func main() {
 
 	server := &lsp.Server{
 		Info: lsp.ServerInfo{
-			Name:    "gdshader-lsp",
+			Name:    "gdshader-language-server",
 			Version: Version,
 		},
 		Handler: &handler.Handler{},

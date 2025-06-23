@@ -14,7 +14,7 @@ import (
 )
 
 type Handler interface {
-	Initialize(clientCapabilities *ClientCapabilities) (*ServerCapabilities, error)
+	Initialize(clientCapabilities ClientCapabilities) (*ServerCapabilities, error)
 }
 
 type Server struct {
@@ -49,7 +49,7 @@ func (s *Server) Serve() error {
 
 		if len(request.ID) == 0 {
 			logger := slog.With("method", request.Method)
-			logger.Debug("Received notification")
+			logger.Debug("Received notification", "params", string(request.Params))
 
 			if request.Method == "exit" {
 				logger.Info("Exiting")
@@ -64,7 +64,7 @@ func (s *Server) Serve() error {
 		}
 
 		logger := slog.With("request_id", request.ID, "method", request.Method)
-		logger.Debug("Received request")
+		logger.Debug("Received request", "params", string(request.Params))
 
 		response, err := s.handleRequest(request.Method, request.Params)
 		if err != nil {
@@ -142,7 +142,7 @@ func (s *Server) handleRequest(method string, paramsRaw json.RawMessage) (any, e
 				Name    string `json:"name"`
 				Version string `json:"version"`
 			} `json:"clientInfo"`
-			Capabilities *ClientCapabilities `json:"capabilities"`
+			Capabilities ClientCapabilities `json:"capabilities"`
 		}
 		if err := parseParams(paramsRaw, &params); err != nil {
 			return nil, err
