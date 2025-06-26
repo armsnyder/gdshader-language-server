@@ -1,3 +1,25 @@
+// MIT License
+//
+// Copyright (c) 2025 Adam Snyder
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 package lsp
 
 import (
@@ -6,13 +28,75 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"slices"
 	"strings"
 	"unicode/utf8"
 
 	"github.com/zyedidia/rope"
 )
+
+// BufferType represents a buffer implementation.
+type BufferType int
+
+const (
+	// BufferTypeDefault chooses a buffer for you.
+	BufferTypeDefault BufferType = iota
+	// BufferTypeGap uses a gap buffer for amortized O(1) insertions and
+	// deletions and fast reads, at the cost of poorer random access.
+	BufferTypeGap
+	// BufferTypeRope uses a rope data structure for efficient random
+	// access and insertions/deletions in large documents.
+	BufferTypeRope
+)
+
+// Filesystem can be embedded into handlers in order to implement the basic
+// document sync methods of the LSP.
+type Filesystem struct {
+	Documents  map[string]*Document
+	BufferType BufferType
+}
+
+// DidOpenTextDocument implements DocumentSyncHandler.
+func (f *Filesystem) DidOpenTextDocument(_ context.Context, params DidOpenTextDocumentParams) error {
+	var buf Buffer
+	switch f.BufferType {
+	case BufferTypeGap:
+		buf = &GapBuffer{}
+	case BufferTypeRope:
+		buf = &RopeBuffer{}
+	}
+
+	if f.Documents == nil {
+		f.Documents = make(map[string]*Document)
+	}
+	f.Documents[params.TextDocument.URI] = NewDocument([]byte(params.TextDocument.Text), buf)
+
+	return nil
+}
+
+// DidCloseTextDocument implements lsp.Handler.
+func (f *Filesystem) DidCloseTextDocument(_ context.Context, params DidCloseTextDocumentParams) error {
+	delete(f.Documents, params.TextDocument.URI)
+	return nil
+}
+
+// DidChangeTextDocument implements lsp.Handler.
+func (f *Filesystem) DidChangeTextDocument(_ context.Context, params DidChangeTextDocumentParams) error {
+	doc, ok := f.Documents[params.TextDocument.URI]
+	if !ok {
+		return fmt.Errorf("document not found: %s", params.TextDocument.URI)
+	}
+
+	for _, change := range params.ContentChanges {
+		if err := doc.ApplyChange(change); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+var _ DocumentSyncHandler = (*Filesystem)(nil)
 
 // Buffer implements large text storage with methods for random access.
 type Buffer interface {
@@ -30,8 +114,7 @@ type Buffer interface {
 
 // Document represents a text document with methods to manipulate its content.
 type Document struct {
-	Buffer Buffer
-
+	buffer    Buffer
 	lineStart []int
 	cache     []byte
 	charBuf   []byte
@@ -40,12 +123,10 @@ type Document struct {
 // NewDocument creates a new Document with the given initial text and buffer.
 // If buf is nil, a GapBuffer is used.
 func NewDocument(text []byte, buf Buffer) *Document {
-	doc := &Document{
-		Buffer: buf,
+	if buf == nil {
+		buf = &GapBuffer{}
 	}
-	if doc.Buffer == nil {
-		doc.Buffer = &GapBuffer{}
-	}
+	doc := &Document{buffer: buf, charBuf: make([]byte, 1024)}
 	doc.Reset(text)
 	return doc
 }
@@ -53,7 +134,7 @@ func NewDocument(text []byte, buf Buffer) *Document {
 // Reset reinitializes the document with the given text.
 func (d *Document) Reset(text []byte) {
 	d.cache = nil
-	d.Buffer.Reset(text)
+	d.buffer.Reset(text)
 	d.lineStart = computeLineStart(text)
 }
 
@@ -62,7 +143,7 @@ func (d *Document) Bytes() []byte {
 	if d.cache != nil {
 		return d.cache
 	}
-	d.cache = d.Buffer.Bytes()
+	d.cache = d.buffer.Bytes()
 	return d.cache
 }
 
@@ -71,7 +152,7 @@ func (d *Document) ReadAt(p []byte, off int64) (n int, err error) {
 	if d.cache != nil {
 		return copy(p, d.cache[off:]), nil
 	}
-	return d.Buffer.ReadAt(p, off)
+	return d.buffer.ReadAt(p, off)
 }
 
 // Len returns the number of bytes in the document.
@@ -79,17 +160,11 @@ func (d *Document) Len() int {
 	if d.cache != nil {
 		return len(d.cache)
 	}
-	return d.Buffer.Len()
+	return d.buffer.Len()
 }
 
 // ApplyChange applies a content change to the document.
 func (d *Document) ApplyChange(change TextDocumentContentChangeEvent) error {
-	if slog.Default().Enabled(context.Background(), slog.LevelDebug) {
-		slog.Debug("ApplyChange called", "change", change)
-		slog.Debug("Before change", "data", string(d.Bytes()), "lineStart", d.lineStart)
-		defer func() { slog.Debug("After change", "data", string(d.Bytes()), "lineStart", d.lineStart) }()
-	}
-
 	d.cache = nil
 
 	if len(d.charBuf) == 0 {
@@ -107,7 +182,7 @@ func (d *Document) ApplyChange(change TextDocumentContentChangeEvent) error {
 	}
 
 	if startOffset != endOffset {
-		d.Buffer.Delete(startOffset, endOffset)
+		d.buffer.Delete(startOffset, endOffset)
 	}
 
 	if change.Text != "" {
@@ -122,7 +197,7 @@ func (d *Document) ApplyChange(change TextDocumentContentChangeEvent) error {
 }
 
 func (d *Document) getChangeOffsets(change TextDocumentContentChangeEvent) (start, end int, err error) {
-	startOffset, err := d.positionToOffset(change.Range.Start)
+	startOffset, err := d.PositionToOffset(change.Range.Start)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -130,7 +205,7 @@ func (d *Document) getChangeOffsets(change TextDocumentContentChangeEvent) (star
 	// Optimize for basic typing, where end == start
 	endOffset := startOffset
 	if change.Range.End != change.Range.Start {
-		endOffset, err = d.positionToOffset(change.Range.End)
+		endOffset, err = d.PositionToOffset(change.Range.End)
 		if err != nil {
 			return 0, 0, err
 		}
@@ -147,11 +222,13 @@ func (d *Document) writeText(text string, off int) error {
 	} else {
 		toWrite = []byte(text)
 	}
-	_, err := d.Buffer.WriteAt(toWrite, int64(off))
+	_, err := d.buffer.WriteAt(toWrite, int64(off))
 	return err
 }
 
-func (d *Document) positionToOffset(pos Position) (int, error) {
+// PositionToOffset converts a Position (line and character) to a byte offset
+// in the document. It correctly handles UTF-16 character widths.
+func (d *Document) PositionToOffset(pos Position) (int, error) {
 	if pos.Line >= len(d.lineStart) {
 		return 0, fmt.Errorf("invalid line: %d", pos.Line)
 	}
@@ -162,7 +239,7 @@ func (d *Document) positionToOffset(pos Position) (int, error) {
 	for offset < end {
 		chunkSize := min(len(d.charBuf), end-offset)
 
-		n, err := d.Buffer.ReadAt(d.charBuf[:chunkSize], int64(offset))
+		n, err := d.buffer.ReadAt(d.charBuf[:chunkSize], int64(offset))
 		if err != nil && !errors.Is(err, io.EOF) {
 			return 0, fmt.Errorf("buffer read at line %d: %w", pos.Line, err)
 		}
@@ -194,7 +271,7 @@ func (d *Document) lineBounds(line int) (start, end int) {
 	if line+1 < len(d.lineStart) {
 		return start, d.lineStart[line+1]
 	}
-	return start, d.Buffer.Len()
+	return start, d.buffer.Len()
 }
 
 func decodeUntilTargetOffset(buf []byte, targetU16Offset int, u16Count *int) (deltaOffset int, done bool, err error) {
@@ -222,6 +299,9 @@ func utf16Width(r rune) int {
 // ArrayBuffer is the simplest implementation of Buffer, using a byte slice
 // for storage. It is optimized for reads. Insertions and deletions are O(n)
 // due to slice copying.
+//
+// This implementation is not recommended and is mainly used as a testing
+// benchmark baseline for smarter buffer implementations.
 type ArrayBuffer struct {
 	data []byte
 }
@@ -261,7 +341,8 @@ func (a *ArrayBuffer) WriteAt(p []byte, off int64) (n int, err error) {
 var _ Buffer = (*ArrayBuffer)(nil)
 
 // GapBuffer implements a gap buffer for amortized O(1) insertions and
-// deletions at the cursor position and O(n) for random access.
+// deletions at the cursor position and O(n) for random access. Its reads
+// are fast compared to [RopeBuffer].
 type GapBuffer struct {
 	buf      []byte
 	gapStart int

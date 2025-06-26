@@ -9,13 +9,16 @@ COV_UNIT := $(PWD)/tmp/cover/unit
 COV_E2E := $(PWD)/tmp/cover/e2e
 COV_MERGED := $(PWD)/tmp/cover/merged
 
-reviewable: tidy fmt lint build test
+reviewable: tidy fmt lint-fix lint build test
 
 tidy:
 	go mod tidy
 
 fmt:
 	golangci-lint fmt
+
+lint-fix:
+	golangci-lint run --fix
 
 lint:
 	golangci-lint run

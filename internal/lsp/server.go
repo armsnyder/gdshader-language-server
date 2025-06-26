@@ -1,3 +1,25 @@
+// MIT License
+//
+// Copyright (c) 2025 Adam Snyder
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 package lsp
 
 import (
@@ -14,12 +36,18 @@ import (
 	"strconv"
 )
 
-// Handler provides the logic for handling LSP requests and notifications.
-type Handler interface {
-	Initialize(ctx context.Context, clientCapabilities ClientCapabilities) (*ServerCapabilities, error)
+// DocumentSyncHandler defines methods for handling document synchronization.
+type DocumentSyncHandler interface {
 	DidOpenTextDocument(ctx context.Context, params DidOpenTextDocumentParams) error
 	DidCloseTextDocument(ctx context.Context, params DidCloseTextDocumentParams) error
 	DidChangeTextDocument(ctx context.Context, params DidChangeTextDocumentParams) error
+}
+
+// Handler provides the logic for handling LSP requests and notifications.
+type Handler interface {
+	DocumentSyncHandler
+	Initialize(ctx context.Context, clientCapabilities ClientCapabilities) (*ServerCapabilities, error)
+	Completion(ctx context.Context, params CompletionParams) (*CompletionList, error)
 }
 
 // Server manages the LSP server lifecycle and dispatching requests and
@@ -83,7 +111,11 @@ func (s *Server) processMessage(payload []byte) bool {
 	}
 
 	logger := slog.With("request_id", request.ID, "method", request.Method)
-	logger.Debug("Received request", "params", string(request.Params))
+	debugEnabled := logger.Enabled(context.TODO(), slog.LevelDebug)
+
+	if debugEnabled {
+		logger.Debug("Received request", "params", string(request.Params))
+	}
 
 	response, err := s.handleRequest(request.Method, request.Params)
 	if err != nil {
@@ -104,7 +136,10 @@ func (s *Server) processMessage(payload []byte) bool {
 		return true
 	}
 
-	logger.Debug("Sent response")
+	if debugEnabled {
+		logger.Debug("Sent response", "response", fmt.Sprintf("%#v", response))
+	}
+
 	return true
 }
 
@@ -202,6 +237,13 @@ func (s *Server) handleRequest(method string, paramsRaw json.RawMessage) (any, e
 
 	case "shutdown":
 		return nil, nil
+
+	case "textDocument/completion":
+		var params CompletionParams
+		if err := parseParams(paramsRaw, &params); err != nil {
+			return nil, err
+		}
+		return s.Handler.Completion(context.TODO(), params)
 
 	default:
 		return nil, &ResponseError{

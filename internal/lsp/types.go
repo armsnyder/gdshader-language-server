@@ -1,3 +1,25 @@
+// MIT License
+//
+// Copyright (c) 2025 Adam Snyder
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 package lsp
 
 import "fmt"
@@ -27,7 +49,7 @@ type CompletionOptions struct{}
 // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentSyncKind
 type TextDocumentSyncKind int
 
-// Text document sync kinds.
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentSyncKind
 const (
 	SyncNone        TextDocumentSyncKind = 0
 	SyncFull        TextDocumentSyncKind = 1
@@ -139,3 +161,69 @@ type Location struct {
 	URI   string `json:"uri"`
 	Range Range  `json:"range"`
 }
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#completionParams
+type CompletionParams struct {
+	TextDocumentPositionParams
+}
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#completionList
+type CompletionList struct {
+	IsIncomplete bool             `json:"isIncomplete"`
+	Items        []CompletionItem `json:"items"`
+}
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#completionItem
+type CompletionItem struct {
+	Label         string             `json:"label"`
+	Kind          CompletionItemKind `json:"kind,omitempty"`
+	Detail        string             `json:"detail,omitempty"`
+	Documentation *MarkupContent     `json:"documentation,omitempty"`
+}
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#completionItemKind
+type CompletionItemKind int
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#completionItemKind
+const (
+	CompletionText          CompletionItemKind = 1
+	CompletionMethod        CompletionItemKind = 2
+	CompletionFunction      CompletionItemKind = 3
+	CompletionConstructor   CompletionItemKind = 4
+	CompletionField         CompletionItemKind = 5
+	CompletionVariable      CompletionItemKind = 6
+	CompletionClass         CompletionItemKind = 7
+	CompletionInterface     CompletionItemKind = 8
+	CompletionModule        CompletionItemKind = 9
+	CompletionProperty      CompletionItemKind = 10
+	CompletionUnit          CompletionItemKind = 11
+	CompletionValue         CompletionItemKind = 12
+	CompletionEnum          CompletionItemKind = 13
+	CompletionKeyword       CompletionItemKind = 14
+	CompletionSnippet       CompletionItemKind = 15
+	CompletionColor         CompletionItemKind = 16
+	CompletionFile          CompletionItemKind = 17
+	CompletionReference     CompletionItemKind = 18
+	CompletionFolder        CompletionItemKind = 19
+	CompletionEnumMember    CompletionItemKind = 20
+	CompletionConstant      CompletionItemKind = 21
+	CompletionStruct        CompletionItemKind = 22
+	CompletionEvent         CompletionItemKind = 23
+	CompletionOperator      CompletionItemKind = 24
+	CompletionTypeParameter CompletionItemKind = 25
+)
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#markupContentInnerDefinition
+type MarkupContent struct {
+	Kind  MarkupKind `json:"kind"`
+	Value string     `json:"value"`
+}
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#markupContent
+type MarkupKind string
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#markupContent
+const (
+	MarkupPlainText MarkupKind = "plaintext"
+	MarkupMarkdown  MarkupKind = "markdown"
+)

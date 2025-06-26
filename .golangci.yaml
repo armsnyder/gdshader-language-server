@@ -6,6 +6,7 @@ linters:
     - ginkgolinter
     - gocritic
     - godot
+    - goheader
     - gosec
     - govet
     - ineffassign
@@ -42,6 +43,8 @@ linters:
       enable-all: true
       disabled-checks:
         - whyNoLint
+    goheader:
+      template-path: LICENSE
     revive:
       enable-all-rules: true
       rules:
