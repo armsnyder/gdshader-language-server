@@ -84,19 +84,19 @@ var completionItems = func() []lsp.CompletionItem {
 
 	describedKeywords := map[string]string{
 		// https://docs.godotengine.org/en/stable/tutorials/shaders/shader_reference/shading_language.html#precision
-		"lowp":          "low precision, usually 8 bits per component mapped to 0-1",
-		"mediump":       "medium precision, usually 16 bits or half float",
-		"highp":         "high precision, uses full float or integer range (32 bit default)",
-		"discard":       "Discards the current fragment, preventing it from being drawn. Used in fragment shaders to skip rendering under certain conditions.",
-		"in":            "An agument only for reading",
-		"out":           "An argument only for writing",
-		"inout":         "An argument that is fully passed via reference",
-		"shader_type":   "Declares the type of shader being written, such as `canvas_item`, `spatial`, or `particle`.",
-		"uniform":       "Declares a variable that can be set from outside the shader",
-		"varying":       "Declares a variable that is passed between vertex and fragment shaders",
-		"flat":          "The value is not interpolated",
-		"smooth":        "The value is interpolated in a perspective-correct fashion. This is the default.",
-		"uniform_group": "Group multiple uniforms together in the inspector",
+		"lowp":           "low precision, usually 8 bits per component mapped to 0-1",
+		"mediump":        "medium precision, usually 16 bits or half float",
+		"highp":          "high precision, uses full float or integer range (32 bit default)",
+		"discard":        "Discards the current fragment, preventing it from being drawn. Used in fragment shaders to skip rendering under certain conditions.",
+		"in":             "An agument only for reading",
+		"out":            "An argument only for writing",
+		"inout":          "An argument that is fully passed via reference",
+		"shader_type":    "Declares the type of shader being written, such as `canvas_item`, `spatial`, or `particle`.",
+		"uniform":        "Declares a variable that can be set from outside the shader",
+		"varying":        "Declares a variable that is passed between vertex and fragment shaders",
+		"flat":           "The value is not interpolated",
+		"smooth":         "The value is interpolated in a perspective-correct fashion. This is the default.",
+		"group_uniforms": "Group multiple uniforms together in the inspector",
 	}
 
 	for label, doc := range describedKeywords {
