@@ -68,11 +68,12 @@ existing code conventions.
 
 ```graphql
 .
-├── main.go # Entry point
+├── main.go  # Entry point
 └── internal
-    ├── ast     # .gdshader file parser library (application agnostic)
-    ├── handler # Main application logic
-    └── lsp     # LSP server library (application agnostic)
+    ├── app       # Main application logic
+    ├── ast       # .gdshader file parser library (application agnostic)
+    ├── lsp       # LSP server library (application agnostic)
+    └── testutil  # Test utilities for all packages
 ```
 
 ## License

@@ -1,12 +1,85 @@
-version: '2'
+version: "2"
 linters:
-  settings:
-    govet:
-      disable:
-        - structtag # participle uses nonconventional tags
-formatters:
   enable:
-    - gofumpt
+    - depguard
+    - errcheck
+    - ginkgolinter
+    - gocritic
+    - godot
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - musttag
+    - nolintlint
+    - revive
+    - sloglint
+    - staticcheck
+    - unused
+  settings:
+    depguard:
+      rules:
+        lsp:
+          files: ["${base-path}/internal/lsp/*"]
+          deny:
+            - pkg: github.com/armsnyder/gdshader-language-server/internal/ast
+              desc: lsp and ast packages should not depend on each other
+            - pkg: github.com/armsnyder/gdshader-language-server/internal/app
+              desc: Library packages should not depend on app package
+        ast:
+          files: ["${base-path}/internal/ast/*"]
+          deny:
+            - pkg: github.com/armsnyder/gdshader-language-server/internal/lsp
+              desc: lsp and ast packages should not depend on each other
+            - pkg: github.com/armsnyder/gdshader-language-server/internal/app
+              desc: Library packages should not depend on app package
+        production:
+          files: ["!**/*_test.go"]
+          deny:
+            - pkg: github.com/armsnyder/gdshader-language-server/internal/testutil
+              desc: Test utilities should not be used in production code
+    gocritic:
+      enable-all: true
+      disabled-checks:
+        - whyNoLint
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: add-constant
+          disabled: true # Too strict
+        - name: cognitive-complexity
+          arguments: [15] # Default 7
+        - name: cyclomatic
+          arguments: [15] # Default 10
+        - name: line-length-limit
+          disabled: true # Too strict
+        - name: max-public-structs
+          disabled: true # Too strict
+        - name: nested-structs
+          disabled: true # Too strict
+        - name: package-comments
+          disabled: true # Not a lib
+        - name: unused-receiver
+          disabled: true # Too common
+    sloglint:
+      msg-style: capitalized
+      key-naming-case: snake
+  exclusions:
+    rules:
+      - path: internal/lsp/types.go
+        text: comment .+ should be of the form # Types are documented with reference URLs
+      - path: internal/ast/types.go
+        text: malformed tag|bad syntax for struct tag # participle uses weird tags
+      - path: _test.go
+        text: dot-imports # gomega
+      - path: _test.go
+        text: function-length
+      - path: _test.go
+        linters: [gosec]
+      - linters: [gocritic]
+        text: contains a path separator # Not a valid check
+formatters:
+  enable: [gofumpt]
   settings:
     gofumpt:
       module-path: github.com/armsnyder/gdshader-language-server

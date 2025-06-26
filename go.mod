@@ -7,6 +7,7 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/onsi/gomega v1.37.0
 	github.com/samber/lo v1.51.0
+	github.com/zyedidia/rope v0.0.0-20210616205215-37fbf22eab3a
 )
 
 require (

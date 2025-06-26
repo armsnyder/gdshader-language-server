@@ -3,6 +3,7 @@ package lsp
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,10 +14,16 @@ import (
 	"strconv"
 )
 
+// Handler provides the logic for handling LSP requests and notifications.
 type Handler interface {
-	Initialize(clientCapabilities ClientCapabilities) (*ServerCapabilities, error)
+	Initialize(ctx context.Context, clientCapabilities ClientCapabilities) (*ServerCapabilities, error)
+	DidOpenTextDocument(ctx context.Context, params DidOpenTextDocumentParams) error
+	DidCloseTextDocument(ctx context.Context, params DidCloseTextDocumentParams) error
+	DidChangeTextDocument(ctx context.Context, params DidChangeTextDocumentParams) error
 }
 
+// Server manages the LSP server lifecycle and dispatching requests and
+// notifications to a handler.
 type Server struct {
 	Stdin   io.Reader
 	Stdout  io.Writer
@@ -24,6 +31,7 @@ type Server struct {
 	Handler Handler
 }
 
+// Serve runs the LSP server. It blocks until the client receives an "exit".
 func (s *Server) Serve() error {
 	if s.Stdin == nil {
 		s.Stdin = os.Stdin
@@ -35,57 +43,9 @@ func (s *Server) Serve() error {
 	slog.Info("Server is running", "name", s.Info.Name, "version", s.Info.Version)
 
 	for scanner.Scan() {
-		// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#requestMessage
-		var request struct {
-			ID     json.RawMessage `json:"id"`
-			Method string          `json:"method"`
-			Params json.RawMessage `json:"params"`
+		if !s.processMessage(scanner.Bytes()) {
+			return nil
 		}
-
-		if err := json.Unmarshal(scanner.Bytes(), &request); err != nil {
-			slog.Error("Bad request", "error", err)
-			continue
-		}
-
-		if len(request.ID) == 0 {
-			logger := slog.With("method", request.Method)
-			logger.Debug("Received notification", "params", string(request.Params))
-
-			if request.Method == "exit" {
-				logger.Info("Exiting")
-				return nil
-			}
-
-			if err := s.handleNotification(request.Method, request.Params); err != nil {
-				logger.Error("Error handling notification", "error", err)
-			}
-
-			continue
-		}
-
-		logger := slog.With("request_id", request.ID, "method", request.Method)
-		logger.Debug("Received request", "params", string(request.Params))
-
-		response, err := s.handleRequest(request.Method, request.Params)
-		if err != nil {
-			logger.Error("Error handling request", "error", err)
-			var asResponseError *ResponseError
-			if errors.As(err, &asResponseError) {
-				response = asResponseError
-			} else {
-				response = &ResponseError{
-					Code:    CodeInternalError,
-					Message: err.Error(),
-				}
-			}
-		}
-
-		if err := s.write(request.ID, response); err != nil {
-			logger.Error("Write error", "error", err)
-			continue
-		}
-
-		logger.Debug("Sent response")
 	}
 
 	slog.Error("Scanner error", "error", scanner.Err())
@@ -93,7 +53,62 @@ func (s *Server) Serve() error {
 	return scanner.Err()
 }
 
-func jsonRPCSplit(data []byte, atEOF bool) (advance int, token []byte, err error) {
+func (s *Server) processMessage(payload []byte) bool {
+	// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#requestMessage
+	var request struct {
+		ID     json.RawMessage `json:"id"`
+		Method string          `json:"method"`
+		Params json.RawMessage `json:"params"`
+	}
+
+	if err := json.Unmarshal(payload, &request); err != nil {
+		slog.Error("Bad request", "error", err)
+		return true
+	}
+
+	if len(request.ID) == 0 {
+		logger := slog.With("method", request.Method)
+		logger.Debug("Received notification", "params", string(request.Params))
+
+		if request.Method == "exit" {
+			logger.Info("Exiting")
+			return false
+		}
+
+		if err := s.handleNotification(request.Method, request.Params); err != nil {
+			logger.Error("Error handling notification", "error", err)
+		}
+
+		return true
+	}
+
+	logger := slog.With("request_id", request.ID, "method", request.Method)
+	logger.Debug("Received request", "params", string(request.Params))
+
+	response, err := s.handleRequest(request.Method, request.Params)
+	if err != nil {
+		logger.Error("Error handling request", "error", err)
+		var asResponseError *ResponseError
+		if errors.As(err, &asResponseError) {
+			response = asResponseError
+		} else {
+			response = &ResponseError{
+				Code:    CodeInternalError,
+				Message: err.Error(),
+			}
+		}
+	}
+
+	if err := s.write(request.ID, response); err != nil {
+		logger.Error("Write error", "error", err)
+		return true
+	}
+
+	logger.Debug("Sent response")
+	return true
+}
+
+func jsonRPCSplit(data []byte, _ bool) (advance int, token []byte, err error) {
 	const headerDelimiter = "\r\n\r\n"
 
 	i := bytes.Index(data, []byte(headerDelimiter))
@@ -125,8 +140,32 @@ func jsonRPCSplit(data []byte, atEOF bool) (advance int, token []byte, err error
 func (s *Server) handleNotification(method string, paramsRaw json.RawMessage) error {
 	switch method {
 	case "initialized":
+
 	case "cancelRequest":
-		// TODO(asnyder): Handle cancelRequest
+		// TODO(asnyder): Handle cancelRequest and make everything
+		// async.
+
+	case "textDocument/didOpen":
+		var params DidOpenTextDocumentParams
+		if err := parseParams(paramsRaw, &params); err != nil {
+			return err
+		}
+		return s.Handler.DidOpenTextDocument(context.TODO(), params)
+
+	case "textDocument/didClose":
+		var params DidCloseTextDocumentParams
+		if err := parseParams(paramsRaw, &params); err != nil {
+			return err
+		}
+		return s.Handler.DidCloseTextDocument(context.TODO(), params)
+
+	case "textDocument/didChange":
+		var params DidChangeTextDocumentParams
+		if err := parseParams(paramsRaw, &params); err != nil {
+			return err
+		}
+		return s.Handler.DidChangeTextDocument(context.TODO(), params)
+
 	default:
 		slog.Warn("Unknown notification", "method", method)
 	}
@@ -150,7 +189,7 @@ func (s *Server) handleRequest(method string, paramsRaw json.RawMessage) (any, e
 
 		slog.Info("Client info", "name", params.ClientInfo.Name, "version", params.ClientInfo.Version)
 
-		serverCapabilities, err := s.Handler.Initialize(params.Capabilities)
+		serverCapabilities, err := s.Handler.Initialize(context.TODO(), params.Capabilities)
 		if err != nil {
 			return nil, err
 		}
@@ -177,7 +216,7 @@ func parseParams(paramsRaw json.RawMessage, result any) error {
 		return &ResponseError{
 			Code:          CodeInvalidParams,
 			Message:       err.Error(),
-			internalError: err,
+			InternalError: err,
 		}
 	}
 	return nil

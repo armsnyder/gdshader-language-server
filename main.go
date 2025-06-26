@@ -5,10 +5,11 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/armsnyder/gdshader-language-server/internal/handler"
+	"github.com/armsnyder/gdshader-language-server/internal/app"
 	"github.com/armsnyder/gdshader-language-server/internal/lsp"
 )
 
+// Version can be set at build time.
 var Version = "development"
 
 func main() {
@@ -32,7 +33,7 @@ func main() {
 			Name:    "gdshader-language-server",
 			Version: Version,
 		},
-		Handler: &handler.Handler{},
+		Handler: &app.Handler{},
 	}
 
 	if err := server.Serve(); err != nil {

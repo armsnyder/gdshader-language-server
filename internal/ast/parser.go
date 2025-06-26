@@ -12,6 +12,7 @@ func init() {
 	parser = participle.MustBuild[File]()
 }
 
+// Parse parses a .gdshader file into a tree of AST nodes.
 func Parse(filename string, reader io.Reader) (*File, error) {
 	return parser.Parse(filename, reader, participle.AllowTrailing(true))
 }
