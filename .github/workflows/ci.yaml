@@ -62,7 +62,7 @@ jobs:
           data="$(jq --null-input --arg message "${coverage}%" --arg color "$color" \
             '{files: {"coverage.json": {content: (
               {schemaVersion:1, label:"coverage", message:$message, color:$color} | tojson
-            )}}})')"
+            )}}}')"
           curl --request PATCH \
                --header "Authorization: token $GIST_TOKEN" \
                --header "Content-Type: application/json" \
