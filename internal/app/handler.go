@@ -27,8 +27,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/armsnyder/gdshader-language-server/internal/lsp"
 	"github.com/samber/lo"
@@ -52,7 +54,7 @@ func (h *Handler) Initialize(context.Context, lsp.ClientCapabilities) (*lsp.Serv
 
 // Completion implements lsp.Handler.
 func (h *Handler) Completion(_ context.Context, params lsp.CompletionParams) (*lsp.CompletionList, error) {
-	currentWord, err := h.getCurrentWord(params)
+	currentWord, c, err := h.getCompletionContext(params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current word: %w", err)
 	}
@@ -66,42 +68,124 @@ func (h *Handler) Completion(_ context.Context, params lsp.CompletionParams) (*l
 	// - Built-in functions https://docs.godotengine.org/en/stable/tutorials/shaders/shader_reference/shader_functions.html#
 
 	return &lsp.CompletionList{
-		Items: lo.Filter(completionItems, func(item lsp.CompletionItem, _ int) bool {
-			return strings.HasPrefix(item.Label, currentWord)
+		Items: lo.FilterMap(completionItems, func(item completionItemPredicate, _ int) (lsp.CompletionItem, bool) {
+			return item.item, strings.HasPrefix(item.item.Label, currentWord) && item.predicate(*c)
 		}),
 	}, nil
 }
 
-func (h *Handler) getCurrentWord(params lsp.CompletionParams) (string, error) {
+func (h *Handler) getCompletionContext(params lsp.CompletionParams) (currentWord string, c *completionContext, err error) {
 	doc, ok := h.Documents[params.TextDocument.URI]
 	if !ok {
-		return "", fmt.Errorf("document not found: %s", params.TextDocument.URI)
+		return "", nil, fmt.Errorf("document not found: %s", params.TextDocument.URI)
 	}
 
 	lineStartPos := params.Position
 	lineStartPos.Character = 0
-	lineStartOffset, err := doc.PositionToOffset(lineStartPos)
+
+	line, err := h.readBetweenPositions(doc, lineStartPos, params.Position)
 	if err != nil {
-		return "", fmt.Errorf("get line offset: %w", err)
+		return "", nil, fmt.Errorf("reading current line: %w", err)
 	}
 
-	currentOffset, err := doc.PositionToOffset(params.Position)
+	firstLine, err := h.readLine(doc, 0)
 	if err != nil {
-		return "", fmt.Errorf("get current offset: %w", err)
+		return "", nil, fmt.Errorf("reading first line: %w", err)
 	}
 
-	line, err := io.ReadAll(io.NewSectionReader(doc, int64(lineStartOffset), int64(currentOffset-lineStartOffset)))
+	c = &completionContext{}
+
+	c.functionName, err = h.getCurrentFunction(doc, params.Position)
 	if err != nil {
-		return "", fmt.Errorf("reading line: %w", err)
+		return "", nil, fmt.Errorf("getting current function: %w", err)
 	}
 
-	i := bytes.LastIndexFunc(line, func(r rune) bool {
-		return unicode.IsSpace(r) || unicode.IsPunct(r)
-	})
-	if i == -1 {
-		return string(line), nil
+	firstLineTokens := tokenize(firstLine)
+	if i := slices.Index(firstLineTokens, "shader_type"); i >= 0 && i < len(firstLineTokens)-1 {
+		c.shaderType = firstLineTokens[i+1]
 	}
-	return string(line[i+1:]), nil
+
+	tokens := tokenize(line)
+	if len(tokens) == 0 {
+		return "", c, nil
+	}
+
+	c.lineTokens = tokens[:len(tokens)-1]
+	return tokens[len(tokens)-1], c, nil
+}
+
+func (h *Handler) readBetweenPositions(doc *lsp.Document, startPos, endPos lsp.Position) ([]byte, error) {
+	startOffset, err := doc.PositionToOffset(startPos)
+	if err != nil {
+		return nil, fmt.Errorf("start position to offset: %w", err)
+	}
+	endOffset, err := doc.PositionToOffset(endPos)
+	if err != nil {
+		return nil, fmt.Errorf("end position to offset: %w", err)
+	}
+
+	return io.ReadAll(io.NewSectionReader(doc, int64(startOffset), int64(endOffset-startOffset)))
+}
+
+func (h *Handler) readLine(doc *lsp.Document, lineNumber int) ([]byte, error) {
+	startPos := lsp.Position{Line: lineNumber, Character: 0}
+	endPos := lsp.Position{Line: lineNumber + 1, Character: 0}
+
+	line, err := h.readBetweenPositions(doc, startPos, endPos)
+	if err != nil {
+		return nil, fmt.Errorf("reading line %d: %w", lineNumber, err)
+	}
+
+	return line, nil
+}
+
+func (h *Handler) getCurrentFunction(doc *lsp.Document, pos lsp.Position) (string, error) {
+	for lineNumber := pos.Line; lineNumber >= 0; lineNumber-- {
+		line, err := h.readLine(doc, lineNumber)
+		if err != nil {
+			return "", fmt.Errorf("reading line %d: %w", lineNumber, err)
+		}
+
+		tokens := tokenize(line)
+		for i := len(tokens) - 2; i > 1; i-- {
+			if tokens[i] == ")" && tokens[i+1] == "{" {
+				return tokens[1], nil
+			}
+		}
+	}
+
+	return "", nil
+}
+
+func tokenize(line []byte) []string {
+	var tokens []string
+
+	isNotWord := func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '_'
+	}
+
+	for {
+		// Skip over any whitespace.
+		line = bytes.TrimLeftFunc(line, unicode.IsSpace)
+		// Capture each punctuation as a separate token.
+		if i := bytes.IndexFunc(line, isNotWord); i == 0 {
+			r, size := utf8.DecodeRune(line)
+			tokens = append(tokens, string(r))
+			line = line[size:]
+			continue
+		}
+		// Capture the word.
+		if i := bytes.IndexFunc(line, isNotWord); i >= 0 {
+			tokens = append(tokens, string(line[:i]))
+			line = line[i:]
+			continue
+		}
+		// This is the last token
+		if len(line) > 0 {
+			tokens = append(tokens, string(line))
+		}
+		return tokens
+	}
 }
 
 var _ lsp.Handler = &Handler{}

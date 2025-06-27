@@ -47,8 +47,9 @@ Coming soon? Contributions welcome!
 Planned features:
 
 - [x] Basic keyword completion
-- [ ] Basic shader-type-dependent global built-in completion
+- [x] Basic shader-type-dependent global built-in completion
       (`VERTEX`, `NORMAL`, etc.)
+- [ ] Built-ins for shader types other than `spatial`
 - [ ] More advanced completion (functions, variables, etc.)
 - [ ] Go to definition
 - [ ] Find references
@@ -56,6 +57,8 @@ Planned features:
 - [ ] Hover (show documentation)
 - [ ] Signature help
 - [ ] VSCode wrapper extension
+- [ ] Make the code more maintainable by generating rules based on the official
+      Godot documentation
 
 ## 🤝 Contributing
 
