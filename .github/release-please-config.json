@@ -5,7 +5,7 @@
       "release-type": "simple",
       "bump-minor-pre-major": true,
       "include-v-in-tag": true,
-      "initial-version": "0.1.0"
+      "extra-files": ["README.md"]
     }
   }
 }

@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
+name: Assets
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  release:
+    name: Assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Create app token
+        uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Upload artifacts
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: '~> v2'
+          args: release --config .github/.goreleaser.yaml
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
