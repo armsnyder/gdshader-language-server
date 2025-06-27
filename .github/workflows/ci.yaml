@@ -43,6 +43,7 @@ jobs:
       - name: Run tests
         run: make test
       - name: Update coverage badge
+        if: github.ref == 'refs/heads/main'
         run: |
           coverage="$(go tool cover -func tmp/cover/merged/cover.out |
             grep '^total:' | awk '{print $3}' | sed 's/%//')"
@@ -70,13 +71,26 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
           GIST_ID: 6858b1591174caeee65c12bec018bbad 
       - name: Prepare pages artifact
+        if: github.ref == 'refs/heads/main'
         run: |
           mkdir -p tmp/site
           cp tmp/cover/merged/cover.html tmp/site
       - name: Upload coverage report artifact
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: tmp/site
+  pages:
+    name: Pages
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [test]
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
   lint:
     name: Lint
     runs-on: ubuntu-latest
