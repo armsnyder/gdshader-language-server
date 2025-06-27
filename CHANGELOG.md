@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/armsnyder/gdshader-language-server/compare/v0.2.0...v0.3.0) (2025-06-27)
+
+
+### Features
+
+* Sign and notarize MacOS binaries ([c54d4dd](https://github.com/armsnyder/gdshader-language-server/commit/c54d4dd34fe39cc93b68462e8d08546290a186f2))
+
 ## [0.2.0](https://github.com/armsnyder/gdshader-language-server/compare/v0.1.0...v0.2.0) (2025-06-27)
 
 
