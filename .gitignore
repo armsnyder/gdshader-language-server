@@ -1,3 +1,4 @@
 /tmp/
 *.test
-gdshader-language-server
+/gdshader-language-server
+/dist/
