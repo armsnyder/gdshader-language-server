@@ -69,10 +69,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
           GIST_ID: 6858b1591174caeee65c12bec018bbad 
+      - name: Prepare pages artifact
+        run: |
+          mkdir -p tmp/site
+          cp tmp/cover/merged/cover.html tmp/site
       - name: Upload coverage report artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: tmp/cover/merged/cover.html
+          path: tmp/site
   lint:
     name: Lint
     runs-on: ubuntu-latest
