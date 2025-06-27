@@ -16,11 +16,28 @@ Godot's shader language is powerful, but editing `.gdshader` files outside the
 Godot editor is painful. This project aims to bring proper language tooling
 (autocomplete, hover, references, etc.) to editors like Neovim and VSCode.
 
+## 🌱 Prior Work
+
+[@GodOfAvacyn](https://github.com/GodOfAvacyn) is the wonderful author of the
+[treesitter plugin](https://github.com/GodOfAvacyn/tree-sitter-gdshader) and
+[language server](https://github.com/GodOfAvacyn/gdshader-lsp) for the Godot
+shader language. Their treesitter plugin is great! As of writing, their
+language server has many false positive diagnostics, and the project became
+inactive while they were
+[working on a full rewrite](https://github.com/GodOfAvacyn/gdshader-lsp/issues/3#issuecomment-2176364609).
+I decided to start this new project to fill the gap for myself.
+
 ## 📦 Install
 
 ### Neovim
 
-1. Install from source:
+1. Install by downloading the latest release or building from source:
+
+   ```shell
+   wget https://github.com/armsnyder/gdshader-language-server/releases/latest/download/gdshader-language-server_$(uname -s)_$(uname -m).tar.gz
+   ```
+
+   _or_
 
    ```shell
    go install github.com/armsnyder/gdshader-language-server@latest
