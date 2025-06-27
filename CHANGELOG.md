@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/armsnyder/gdshader-language-server/compare/v0.1.0...v0.2.0) (2025-06-27)
+
+
+### Features
+
+* Built-in completion for spatial shaders and smarter completion ([8d45618](https://github.com/armsnyder/gdshader-language-server/commit/8d456186fcd098575915e467d14c5931fc1d9d11))
+
 ## 0.1.0 (2025-06-27)
 
 
