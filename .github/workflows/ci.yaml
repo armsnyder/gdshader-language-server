@@ -63,14 +63,16 @@ jobs:
             '{files: {"coverage.json": {content: (
               {schemaVersion:1, label:"coverage", message:$message, color:$color} | tojson
             )}}}')"
-          curl --request PATCH \
-               --header "Authorization: token $GIST_TOKEN" \
-               --header "Content-Type: application/json" \
-               --data "$data" \
-               "https://api.github.com/gists/$GIST_ID"
+          jq --null-input --arg message "${coverage}%" --arg color "$color" \
+            '{schemaVersion: 1, label: "coverage", message: $message, color: $color}' > tmp/coverage.json
+          gh gist edit "$GIST_ID" tmp/coverage.json
         env:
-          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
-          GIST_ID: 6858b1591174caeee65c12bec018bbad
+          GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: 6858b1591174caeee65c12bec018bbad 
+      - name: Upload coverage report artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: tmp/cover/merged/cover.html
   lint:
     name: Lint
     runs-on: ubuntu-latest
