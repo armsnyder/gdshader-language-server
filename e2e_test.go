@@ -24,20 +24,24 @@ package main_test
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/armsnyder/gdshader-language-server/internal/app"
 	. "github.com/onsi/gomega"
 
 	"github.com/samber/lo"
 )
+
+//go:embed version.txt
+var version string
 
 func TestE2E(t *testing.T) {
 	g := NewWithT(t)
@@ -91,7 +95,7 @@ func TestE2E(t *testing.T) {
 		expected += "Content-Length: " + strconv.Itoa(len(s)) + "\r\nContent-Type: application/vscode-jsonrpc; charset=utf-8\r\n\r\n" + s
 	}
 
-	expect(fmt.Sprintf(`{"jsonrpc":"2.0","id":1,"result":{"capabilities":{"textDocumentSync":{"openClose":true,"change":2},"completionProvider":{}},"serverInfo":{"name":"gdshader-language-server","version":%q}}}`, app.Version))
+	expect(fmt.Sprintf(`{"jsonrpc":"2.0","id":1,"result":{"capabilities":{"textDocumentSync":{"openClose":true,"change":2},"completionProvider":{}},"serverInfo":{"name":"gdshader-language-server","version":%q}}}`, strings.TrimSpace(version)))
 	expect(`{"jsonrpc":"2.0","id":2,"result":null}`)
 
 	g.Expect(stdout.String()).To(BeComparableTo(string(expected)), "Output does not match expected")

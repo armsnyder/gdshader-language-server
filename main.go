@@ -23,14 +23,19 @@
 package main
 
 import (
+	_ "embed"
 	"flag"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/armsnyder/gdshader-language-server/internal/app"
 	"github.com/armsnyder/gdshader-language-server/internal/lsp"
 )
+
+//go:embed version.txt
+var version string
 
 func main() {
 	var flags struct {
@@ -46,7 +51,7 @@ func main() {
 	server := &lsp.Server{
 		Info: lsp.ServerInfo{
 			Name:    "gdshader-language-server",
-			Version: app.Version,
+			Version: strings.TrimSpace(version),
 		},
 		Handler: &app.Handler{},
 	}

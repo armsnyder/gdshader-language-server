@@ -2,10 +2,10 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "packages": {
     ".": {
-      "release-type": "go",
+      "release-type": "simple",
       "bump-minor-pre-major": true,
       "include-v-in-tag": true,
-      "extra-files": ["internal/app/version.go"]
+      "initial-version": "0.0.1"
     }
   }
 }
