@@ -1,11 +1,9 @@
 # Godot Shader Language Server
 
-[![Go](https://img.shields.io/badge/Made%20with-Go-00ADD8?logo=go&logoColor=white)](https://go.dev/)
-[![License](https://img.shields.io/github/license/armsnyder/gdshader-language-server)](https://github.com/armsnyder/gdshader-language-server/blob/main/LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/armsnyder/gdshader-language-server)](https://github.com/armsnyder/gdshader-language-server/releases/latest)
 [![CI](https://github.com/armsnyder/gdshader-language-server/actions/workflows/ci.yaml/badge.svg)](https://github.com/armsnyder/gdshader-language-server/actions/workflows/ci.yaml)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/armsnyder/6858b1591174caeee65c12bec018bbad/raw/coverage.json)](https://armsnyder.github.io/gdshader-language-server/cover.html)
 [![Go Report Card](https://goreportcard.com/badge/github.com/armsnyder/gdshader-language-server)](https://goreportcard.com/report/github.com/armsnyder/gdshader-language-server)
-[![GitHub release](https://img.shields.io/github/v/release/armsnyder/gdshader-language-server)](https://github.com/armsnyder/gdshader-language-server/releases/latest)
 
 External editor support for `.gdshader` files.
 
