@@ -32,8 +32,8 @@ import (
 	"github.com/armsnyder/gdshader-language-server/internal/lsp"
 )
 
-// Version can be set at build time.
-var Version = "development"
+// Version is set by release-please.
+const Version = "0.0.0"
 
 func main() {
 	var flags struct {
