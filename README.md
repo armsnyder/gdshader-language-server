@@ -31,7 +31,9 @@ I decided to start this new project to fill the gap for myself.
 
 ### Neovim
 
-1. Install by downloading the latest release or building from source:
+1. Install by downloading the
+   [latest release](https://github.com/armsnyder/gdshader-language-server/releases/latest)
+   or building from source:
 
    ```shell
    wget https://github.com/armsnyder/gdshader-language-server/releases/latest/download/gdshader-language-server_$(uname -s)_$(uname -m).tar.gz
