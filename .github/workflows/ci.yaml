@@ -41,7 +41,36 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Run tests
-        run: go test ./...
+        run: make test
+      - name: Update coverage badge
+        run: |
+          coverage="$(go tool cover -func tmp/cover/merged/cover.out |
+            grep '^total:' | awk '{print $3}' | sed 's/%//')"
+          if (( $(echo "$coverage < 50" | bc --mathlib) )); then
+            color="red"
+          elif (( $(echo "$coverage < 60" | bc --mathlib) )); then
+            color="orange"
+          elif (( $(echo "$coverage < 70" | bc --mathlib) )); then
+            color="yellow"
+          elif (( $(echo "$coverage < 80" | bc --mathlib) )); then
+            color="yellowgreen"
+          elif (( $(echo "$coverage < 90" | bc --mathlib) )); then
+            color="green"
+          else
+            color="brightgreen"
+          fi
+          data="$(jq --null-input --arg message "${coverage}%" --arg color "$color" \
+            '{files: {"coverage.json": {content: (
+              {schemaVersion:1, label:"coverage", message:$message, color:$color} | tojson
+            )}}})')"
+          curl --request PATCH \
+               --header "Authorization: token $GIST_TOKEN" \
+               --header "Content-Type: application/json" \
+               --data "$data" \
+               "https://api.github.com/gists/$GIST_ID"
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: 6858b1591174caeee65c12bec018bbad
   lint:
     name: Lint
     runs-on: ubuntu-latest
