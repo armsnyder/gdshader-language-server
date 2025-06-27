@@ -5,7 +5,7 @@
       "release-type": "go",
       "bump-minor-pre-major": true,
       "include-v-in-tag": true,
-      "version-file": "main.go"
+      "version-file": "internal/app/version.go"
     }
   }
 }
