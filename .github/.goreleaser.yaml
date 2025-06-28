@@ -52,6 +52,6 @@ binary_signs:
     args:
       - sign-blob
       - --key=env://COSIGN_KEY
-      - --output-signature=${signature}"
-      - "${artifact}"
+      - --output-signature=${signature}
+      - ${artifact}
       - --yes
