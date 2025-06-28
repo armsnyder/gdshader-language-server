@@ -12,7 +12,8 @@ builds:
 
 # https://goreleaser.com/customization/archive
 archives:
-  - formats: [tar.gz]
+  - id: archives
+    formats: [tar.gz]
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{ .ProjectName }}_
@@ -20,6 +21,11 @@ archives:
       {{- if eq .Arch "amd64" }}x86_64
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
+    files:
+      - LICENSE
+      - CHANGELOG.md
+      - src: "{{ .ArtifactPath }}.sig"
+        strip_parent: true
     # use zip for windows archives
     format_overrides:
       - goos: windows
@@ -36,7 +42,7 @@ changelog:
 # https://goreleaser.com/customization/notarize
 notarize:
   macos:
-    - enabled: true
+    - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
       sign:
         certificate: "{{ .Env.MACOS_SIGN_P12 }}"
         password: "{{ .Env.MACOS_SIGN_PASSWORD }}"
@@ -47,7 +53,9 @@ notarize:
 
 # https://goreleaser.com/customization/binary_sign
 binary_signs:
-  - cmd: cosign
+  - id: cosign
+    signature: "${artifact}.sig"
+    cmd: cosign
     stdin: "{{ .Env.COSIGN_PWD }}"
     args:
       - sign-blob
@@ -55,3 +63,7 @@ binary_signs:
       - --output-signature=${signature}
       - ${artifact}
       - --yes
+
+# https://goreleaser.com/customization/release
+release:
+  ids: [archives]
