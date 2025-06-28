@@ -49,11 +49,10 @@ notarize:
 binary_signs:
   - cmd: cosign
     stdin: "{{ .Env.COSIGN_PWD }}"
+    signature: "${artifact}.sig"
     args:
       - sign-blob
-      - --key
-      - env://COSIGN_KEY
-      - --output-signature
-      - "${artifact}.sig"
+      - --key=env://COSIGN_KEY
+      - --output-signature=${signature}"
       - "${artifact}"
       - --yes

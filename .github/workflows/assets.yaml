@@ -28,7 +28,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           version: '~> v2'
-          args: release --config .github/.goreleaser.yaml
+          args: release --config .github/.goreleaser.yaml --clean
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           MACOS_SIGN_P12: ${{ secrets.MACOS_SIGN_P12 }}
