@@ -16,8 +16,6 @@ jobs:
           go-version-file: go.mod
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
-        with:
-          version: v2.0.0
       - name: Create app token
         uses: actions/create-github-app-token@v2
         id: app-token

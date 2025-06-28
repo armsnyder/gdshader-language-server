@@ -4,15 +4,21 @@ version: 2
 
 # https://goreleaser.com/customization/builds/go
 builds:
-  - env:
-      - CGO_ENABLED=0
-    goarch:
-      - amd64
-      - arm64
+  - id: linix-windows
+    goos: [linux, windows]
+    goarch: [amd64, arm64]
+    env: [CGO_ENABLED=0]
+    # Separating the macos builds so that we can exclude them from cosign
+    # (since the binary is manupilated by the notarization process).
+  - id: darwin
+    goos: [darwin]
+    goarch: [amd64, arm64]
+    env: [CGO_ENABLED=0]
 
 # https://goreleaser.com/customization/archive
 archives:
   - id: archives
+    ids: [linix-windows, darwin]
     formats: [tar.gz]
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
@@ -24,6 +30,7 @@ archives:
     files:
       - LICENSE
       - CHANGELOG.md
+      - README.md
       - src: "{{ .ArtifactPath }}.sig"
         strip_parent: true
     # use zip for windows archives
@@ -53,7 +60,10 @@ notarize:
 
 # https://goreleaser.com/customization/binary_sign
 binary_signs:
-  - id: cosign
+  - id: cosign-binaries
+    # Annoyingly, build_signs runs before notarize, which messes with the
+    # macos builds, so we only sign linux and windows builds.
+    ids: [linux-windows]
     signature: "${artifact}.sig"
     cmd: cosign
     stdin: "{{ .Env.COSIGN_PWD }}"
@@ -64,6 +74,18 @@ binary_signs:
       - ${artifact}
       - --yes
 
+# https://goreleaser.com/customization/sign
+signs:
+  - id: cosign-checksum
+    cmd: cosign
+    args:
+      - sign-blob
+      - --key=env://COSIGN_KEY
+      - --output-signature=${signature}
+      - ${artifact}
+      - --yes
+    artifacts: checksum
+
 # https://goreleaser.com/customization/release
 release:
-  ids: [archives]
+  ids: [archives, cosign-checksum]
