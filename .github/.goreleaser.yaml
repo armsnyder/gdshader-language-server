@@ -92,6 +92,7 @@ binary_signs:
 signs:
   - id: cosign-checksum
     cmd: cosign
+    stdin: "{{ .Env.COSIGN_PWD }}"
     args:
       - sign-blob
       - --key=env://COSIGN_KEY
