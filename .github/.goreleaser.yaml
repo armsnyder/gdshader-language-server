@@ -17,8 +17,7 @@ builds:
 
 # https://goreleaser.com/customization/archive
 archives:
-  - id: linux-windows
-    ids: [linix-windows]
+  - id: archives
     formats: [tar.gz]
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
@@ -31,26 +30,14 @@ archives:
       - LICENSE
       - CHANGELOG.md
       - README.md
-      - src: "{{ .ArtifactPath }}.sig"
+      # Note: The "*" makes the file optional, since the macos builds
+      # are not signed by Cosign.
+      - src: "{{ .ArtifactPath }}.sig*"
         strip_parent: true
     # use zip for windows archives
     format_overrides:
       - goos: windows
         formats: [zip]
-  - id: darwin
-    ids: [darwin]
-    formats: [tar.gz]
-    # this name template makes the OS and Arch compatible with the results of `uname`.
-    name_template: >-
-      {{ .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}
-    files:
-      - LICENSE
-      - CHANGELOG.md
-      - README.md
 
 # https://goreleaser.com/customization/checksum
 checksum:
@@ -103,4 +90,4 @@ signs:
 
 # https://goreleaser.com/customization/release
 release:
-  ids: [linux-windows, darwin, cosign-checksum]
+  ids: [archives, cosign-checksum]
