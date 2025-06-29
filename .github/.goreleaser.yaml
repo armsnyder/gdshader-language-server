@@ -17,8 +17,8 @@ builds:
 
 # https://goreleaser.com/customization/archive
 archives:
-  - id: archives
-    ids: [linix-windows, darwin]
+  - id: linux-windows
+    ids: [linix-windows]
     formats: [tar.gz]
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
@@ -37,6 +37,20 @@ archives:
     format_overrides:
       - goos: windows
         formats: [zip]
+  - id: darwin
+    ids: [darwin]
+    formats: [tar.gz]
+    # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    files:
+      - LICENSE
+      - CHANGELOG.md
+      - README.md
 
 # https://goreleaser.com/customization/checksum
 checksum:
@@ -88,4 +102,4 @@ signs:
 
 # https://goreleaser.com/customization/release
 release:
-  ids: [archives, cosign-checksum]
+  ids: [linux-windows, darwin, cosign-checksum]
