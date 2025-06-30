@@ -22,6 +22,9 @@
     "url": "git+https://github.com/armsnyder/gdshader-language-server.git",
     "directory": "vscode-extension"
   },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
   "devDependencies": {
     "@eslint/js": "^9.30.0",
     "@types/adm-zip": "^0.5.7",
@@ -33,11 +36,11 @@
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.6.0",
     "eslint": "^9.30.0",
-    "prettier": "^3.6.2",
-    "vscode-languageclient": "^9.0.1"
+    "prettier": "^3.6.2"
   },
   "files": [
     "src",
+    "node_modules",
     "cosign.pub",
     "icon.png",
     "language-configuration.json",
