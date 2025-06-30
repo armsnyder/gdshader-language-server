@@ -1,6 +1,8 @@
 /node_modules/
 /.vscode-test/
+*.vsix
 
 # These files are copied from the repo root during CI
 /cosign.pub
 /CHANGELOG.md
+/LICENSE
