@@ -5,10 +5,6 @@
       "release-type": "simple",
       "bump-minor-pre-major": true,
       "include-v-in-tag": true
-    },
-    "vscode-extension": {
-      "bump-minor-pre-major": true,
-      "include-v-in-tag": true
     }
   }
 }

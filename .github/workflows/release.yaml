@@ -44,7 +44,7 @@ jobs:
         run: npm ci
         working-directory: vscode-extension
       - name: Publish VSCode extension
-        run: npm run publish
+        run: npm run publish -- $(cat ../version.txt)
         working-directory: vscode-extension
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}

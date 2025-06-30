@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.schemastore.org/package.json",
   "name": "gdshader-language-server",
-  "version": "0.3.0",
+  "version": "0.0.0",
   "description": "Language support for Godot's .gdshader files",
   "author": "armsnyder",
   "main": "./src/extension.js",
@@ -13,7 +13,7 @@
     "format:check": "prettier --check .",
     "test": "vscode-test",
     "typecheck": "tsc",
-    "publish": "cp ../CHANGELOG.md . && cp ../cosign.pub . && vsce publish"
+    "publish": "cp ../cosign.pub . && vsce publish --changelog-path ../CHANGELOG.md"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.0",
@@ -29,6 +29,13 @@
     "prettier": "^3.6.2",
     "vscode-languageclient": "^9.0.1"
   },
+  "files": [
+    "src",
+    "cosign.pub",
+    "icon.png",
+    "language-configuration.json",
+    "README.md"
+  ],
   "publisher": "armsnyder",
   "displayName": "GDShader",
   "icon": "icon.png",
