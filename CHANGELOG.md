@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/armsnyder/gdshader-language-server/compare/v0.4.0...v0.4.1) (2025-06-30)
+
+
+### Bug Fixes
+
+* **vscode:** Fix missing languageserver-client dependency ([d1fb3c8](https://github.com/armsnyder/gdshader-language-server/commit/d1fb3c862106a7af4020e071c23cc7e10035e6f0))
+
 ## [0.4.0](https://github.com/armsnyder/gdshader-language-server/compare/v0.3.0...v0.4.0) (2025-06-30)
 
 
