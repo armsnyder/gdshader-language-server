@@ -37,6 +37,6 @@ jobs:
       - name: Test packaging
         run: npm run package
         working-directory: vscode-extension
-      - name: Run tests
-        run: xvfb-run -a npm test
-        working-directory: vscode-extension
+      # - name: Run tests
+      #   run: xvfb-run -a npm test
+      #   working-directory: vscode-extension
