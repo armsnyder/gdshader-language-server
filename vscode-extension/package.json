@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.schemastore.org/package.json",
   "name": "gdshader-language-server",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Language support for .gdshader files",
   "author": "armsnyder",
   "main": "./src/extension.js",

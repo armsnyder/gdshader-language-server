@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/armsnyder/gdshader-language-server/compare/v0.3.0...v0.4.0) (2025-06-30)
+
+
+### Features
+
+* Create a VSCode extension ([d99d397](https://github.com/armsnyder/gdshader-language-server/commit/d99d3971a97a09f0120d0b2d5a21eb399ebb8bb9))
+
 ## [0.3.0](https://github.com/armsnyder/gdshader-language-server/compare/v0.2.0...v0.3.0) (2025-06-27)
 
 
