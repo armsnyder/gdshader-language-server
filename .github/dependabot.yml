@@ -15,3 +15,10 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+  - package-ecosystem: npm
+    directory: /vscode-extension
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: chore
+      include: scope

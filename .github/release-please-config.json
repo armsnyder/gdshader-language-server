@@ -4,8 +4,11 @@
     ".": {
       "release-type": "simple",
       "bump-minor-pre-major": true,
-      "include-v-in-tag": true,
-      "extra-files": ["README.md"]
+      "include-v-in-tag": true
+    },
+    "vscode-extension": {
+      "bump-minor-pre-major": true,
+      "include-v-in-tag": true
     }
   }
 }

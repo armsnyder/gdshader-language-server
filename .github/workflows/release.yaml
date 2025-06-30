@@ -1,11 +1,11 @@
 # yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
-name: Assets
+name: Release
 on:
   push:
     tags: ["v*"]
 jobs:
   release:
-    name: Assets
+    name: Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -14,6 +14,10 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
       - name: Create app token
@@ -36,3 +40,11 @@ jobs:
           MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
           COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
           COSIGN_PWD: ${{ secrets.COSIGN_PWD }}
+      - name: Install dependencies
+        run: npm ci
+        working-directory: vscode-extension
+      - name: Publish VSCode extension
+        run: npm run publish
+        working-directory: vscode-extension
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

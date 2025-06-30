@@ -1,0 +1,6 @@
+/node_modules/
+/.vscode-test/
+
+# These files are copied from the repo root during CI
+/cosign.pub
+/CHANGELOG.md

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "node16",
+    "module": "node16",
+    "allowJs": true,
+    "checkJs": true,
+    "skipLibCheck": true,
+    "noImplicitAny": true,
+    "strict": true,
+    "noEmit": true,
+    "outDir": "dist"
+  },
+  "exclude": ["node_modules"]
+}

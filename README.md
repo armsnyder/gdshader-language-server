@@ -16,26 +16,35 @@ External editor support for `.gdshader` files.
 
 Godot's shader language is powerful, but editing `.gdshader` files outside the
 Godot editor is painful. This project aims to bring proper language tooling
-(autocomplete, hover, references, etc.) to editors like Neovim and VSCode.
+(autocomplete, hover, references, etc.) to editors like Neovim and VSCode. It
+aims to be memory-efficient and editor-agnostic.
 
 ## 🌱 Prior Work
 
-[@GodOfAvacyn](https://github.com/GodOfAvacyn) is the wonderful author of the
-[treesitter plugin](https://github.com/GodOfAvacyn/tree-sitter-gdshader) and
-[language server](https://github.com/GodOfAvacyn/gdshader-lsp) for the Godot
-shader language. Their treesitter plugin is great! As of writing, their
-language server has many false positive diagnostics, and the project became
-inactive while they were
-[working on a full rewrite](https://github.com/GodOfAvacyn/gdshader-lsp/issues/3#issuecomment-2176364609).
-I decided to start this new project to fill the gap for myself.
+1. [@GodOfAvacyn](https://github.com/GodOfAvacyn) is the author of the
+   [treesitter plugin](https://github.com/GodOfAvacyn/tree-sitter-gdshader) and
+   [language server](https://github.com/GodOfAvacyn/gdshader-lsp) for the Godot
+   shader language. Their treesitter plugin is great! As of writing, their
+   language server has many false positive diagnostics, and the project became
+   inactive while they were [working on a full
+   rewrite](https://github.com/GodOfAvacyn/gdshader-lsp/issues/3#issuecomment-2176364609).
+
+2. [@AlfishSoftware](https://github.com/AlfishSoftware) is the author of the
+   [Godot Files VSCode
+   Extension](https://github.com/AlfishSoftware/godot-files-vscode), which
+   includes some support for `.gdshader` files. However, it is VSCode-only. If
+   you are a VSCode user, I recommend checking it out!
+
+3. There is an [official Godot VSCode
+   plugin](https://github.com/godotengine/godot-vscode-plugin), but it has
+   minimal shader support and is VSCode-only.
 
 ## 📦 Install
 
 ### Neovim
 
-1. Install by downloading the
-   [latest release](https://github.com/armsnyder/gdshader-language-server/releases/latest)
-   or building from source:
+1. Download the [latest release](https://github.com/armsnyder/gdshader-language-server/releases/latest)
+   or build from source:
 
    ```shell
    wget https://github.com/armsnyder/gdshader-language-server/releases/latest/download/gdshader-language-server_$(uname -s)_$(uname -m).tar.gz
@@ -47,9 +56,9 @@ I decided to start this new project to fill the gap for myself.
    go install github.com/armsnyder/gdshader-language-server@latest
    ```
 
-1. Create a `~/.config/nvim/after/ftplugin/gdshader.lua` file with the following
-   content, adjusting the path to the `gdshader-language-server` binary if
-   necessary:
+1. Create a `~/.config/nvim/after/ftplugin/gdshader.lua` file with the
+   following content, adjusting the path to the `gdshader-language-server`
+   binary if necessary:
 
    ```lua
    vim.lsp.start({
@@ -61,7 +70,7 @@ I decided to start this new project to fill the gap for myself.
 
 ### VSCode
 
-Coming soon? Contributions welcome!
+Work in progress
 
 ## Roadmap
 
@@ -80,6 +89,8 @@ Planned features:
 - [ ] VSCode wrapper extension
 - [ ] Make the code more maintainable by generating rules based on the official
       Godot documentation
+- [ ] [Grammar](https://code.visualstudio.com/api/references/contribution-points#contributes.grammars)
+      for the VSCode extension
 
 ## 🤝 Contributing
 
