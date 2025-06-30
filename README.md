@@ -70,7 +70,7 @@ aims to be memory-efficient and editor-agnostic.
 
 ### VSCode
 
-Work in progress
+[Install the extension](https://marketplace.visualstudio.com/items?itemName=armsnyder.gdshader-language-server)
 
 ## Roadmap
 
@@ -79,6 +79,7 @@ Planned features:
 - [x] Basic keyword completion
 - [x] Basic shader-type-dependent global built-in completion
       (`VERTEX`, `NORMAL`, etc.)
+- [x] VSCode wrapper extension
 - [ ] Built-ins for shader types other than `spatial`
 - [ ] More advanced completion (functions, variables, etc.)
 - [ ] Go to definition
@@ -86,7 +87,6 @@ Planned features:
 - [ ] Formatting
 - [ ] Hover (show documentation)
 - [ ] Signature help
-- [ ] VSCode wrapper extension
 - [ ] Make the code more maintainable by generating rules based on the official
       Godot documentation
 - [ ] [Grammar](https://code.visualstudio.com/api/references/contribution-points#contributes.grammars)

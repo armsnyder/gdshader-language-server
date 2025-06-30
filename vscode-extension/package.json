@@ -2,7 +2,7 @@
   "$schema": "https://www.schemastore.org/package.json",
   "name": "gdshader-language-server",
   "version": "0.3.0",
-  "description": "Language support for .gdshader files",
+  "description": "Language support for Godot's .gdshader files",
   "author": "armsnyder",
   "main": "./src/extension.js",
   "type": "commonjs",
@@ -30,7 +30,7 @@
     "vscode-languageclient": "^9.0.1"
   },
   "publisher": "armsnyder",
-  "displayName": "Godot Shader Language",
+  "displayName": "GDShader",
   "icon": "icon.png",
   "preview": true,
   "engines": {
