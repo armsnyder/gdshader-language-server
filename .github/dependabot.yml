@@ -8,6 +8,9 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+    groups:
+      Go:
+        patterns: ["*"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -15,6 +18,9 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+    groups:
+      Actions:
+        patterns: ["*"]
   - package-ecosystem: npm
     directory: /vscode-extension
     schedule:
@@ -22,3 +28,6 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+    groups:
+      NPM:
+        patterns: ["*"]
