@@ -65,28 +65,48 @@ type ServerInfo struct {
 	Version string `json:"version"`
 }
 
+// Message satisfies the LSP message interface.
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#abstractMessage
+type Message interface {
+	message()
+}
+
 // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#requestMessage
-type Request struct {
+type RequestMessage struct {
 	JSONRPC string          `json:"jsonrpc"`
 	ID      json.RawMessage `json:"id"`
 	Method  string          `json:"method"`
 	Params  json.RawMessage `json:"params"`
 }
 
+func (r *RequestMessage) message() {}
+
 // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#notificationMessage
-type Notification struct {
+type NotificationMessage struct {
 	JSONRPC string          `json:"jsonrpc"`
 	Method  string          `json:"method"`
 	Params  json.RawMessage `json:"params,omitempty"`
 }
 
+func (n *NotificationMessage) message() {}
+
 // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
-type Response struct {
+type ResponseMessage struct {
 	JSONRPC string          `json:"jsonrpc"`
 	ID      json.RawMessage `json:"id"`
-	Result  any             `json:"result,omitempty"`
-	Error   *ResponseError  `json:"error,omitempty"`
+	Result  any             `json:"result"`
 }
+
+func (r *ResponseMessage) message() {}
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
+type ErrorResponseMessage struct {
+	JSONRPC string          `json:"jsonrpc"`
+	ID      json.RawMessage `json:"id"`
+	Error   *ResponseError  `json:"error"`
+}
+
+func (e *ErrorResponseMessage) message() {}
 
 // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseError
 type ResponseError struct {
