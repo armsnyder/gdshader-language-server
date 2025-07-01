@@ -82,13 +82,7 @@ func (s *Server) Serve() error {
 }
 
 func (s *Server) processMessage(payload []byte) bool {
-	// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#requestMessage
-	var request struct {
-		ID     json.RawMessage `json:"id"`
-		Method string          `json:"method"`
-		Params json.RawMessage `json:"params"`
-	}
-
+	var request Request
 	if err := json.Unmarshal(payload, &request); err != nil {
 		slog.Error("Bad request", "error", err)
 		return true
@@ -131,7 +125,7 @@ func (s *Server) processMessage(payload []byte) bool {
 		}
 	}
 
-	if err := s.write(request.ID, response); err != nil {
+	if err := s.writeResponse(request.ID, response); err != nil {
 		logger.Error("Write error", "error", err)
 		return true
 	}
@@ -176,7 +170,7 @@ func (s *Server) handleNotification(method string, paramsRaw json.RawMessage) er
 	switch method {
 	case "initialized":
 
-	case "cancelRequest":
+	case "$/cancelRequest":
 		// TODO(asnyder): Handle cancelRequest and make everything
 		// async.
 
@@ -264,23 +258,30 @@ func parseParams(paramsRaw json.RawMessage, result any) error {
 	return nil
 }
 
-func (s *Server) write(requestID json.RawMessage, result any) error {
-	// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
-	message := struct {
-		JSONRPC string          `json:"jsonrpc"`
-		ID      json.RawMessage `json:"id"`
-		Result  any             `json:"result"`
-	}{JSONRPC: "2.0", ID: requestID, Result: result}
+func (s *Server) writeResponse(requestID json.RawMessage, result any) error {
+	message := Response{
+		JSONRPC: "2.0",
+		ID:      requestID,
+		Result:  result,
+	}
 
 	data, err := json.Marshal(message)
 	if err != nil {
-		return fmt.Errorf("invalid response: %w", err)
+		return fmt.Errorf("marshal response: %w", err)
 	}
 
+	if err := s.writeRaw(data); err != nil {
+		return fmt.Errorf("write response: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Server) writeRaw(data []byte) error {
 	if s.Stdout == nil {
 		s.Stdout = os.Stdout
 	}
 
-	_, err = s.Stdout.Write(append([]byte("Content-Length: "+strconv.Itoa(len(data))+"\r\nContent-Type: application/vscode-jsonrpc; charset=utf-8\r\n\r\n"), data...))
+	_, err := s.Stdout.Write(append([]byte("Content-Length: "+strconv.Itoa(len(data))+"\r\nContent-Type: application/vscode-jsonrpc; charset=utf-8\r\n\r\n"), data...))
 	return err
 }

@@ -22,7 +22,10 @@
 
 package lsp
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#clientCapabilities
 type ClientCapabilities struct{}
@@ -60,6 +63,29 @@ const (
 type ServerInfo struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
+}
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#requestMessage
+type Request struct {
+	JSONRPC string          `json:"jsonrpc"`
+	ID      json.RawMessage `json:"id"`
+	Method  string          `json:"method"`
+	Params  json.RawMessage `json:"params"`
+}
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#notificationMessage
+type Notification struct {
+	JSONRPC string          `json:"jsonrpc"`
+	Method  string          `json:"method"`
+	Params  json.RawMessage `json:"params,omitempty"`
+}
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
+type Response struct {
+	JSONRPC string          `json:"jsonrpc"`
+	ID      json.RawMessage `json:"id"`
+	Result  any             `json:"result,omitempty"`
+	Error   *ResponseError  `json:"error,omitempty"`
 }
 
 // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseError
