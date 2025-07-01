@@ -38,10 +38,10 @@ function detectMinimumVSCodeVersion() {
 export default defineConfig([
   {
     version: "stable",
-    files: "**/*.test.js",
+    files: "src/**/*.test.js",
   },
   {
     version: detectMinimumVSCodeVersion(),
-    files: "**/*.test.js",
+    files: "src/**/*.test.js",
   },
 ]);
