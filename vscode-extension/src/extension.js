@@ -78,10 +78,11 @@ async function activate(context) {
         fileEvents: vscode.workspace.createFileSystemWatcher("**/.clientrc"),
       },
       outputChannel: logger(),
+      traceOutputChannel: logger(),
     };
 
     const client = new LanguageClient(
-      "gdshaderLanguageServer",
+      "gdshader",
       "GDShader Language Server",
       serverOptions,
       clientOptions,

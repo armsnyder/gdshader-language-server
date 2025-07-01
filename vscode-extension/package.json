@@ -70,6 +70,23 @@
     "lsp"
   ],
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "GDShader Language Server Configuration",
+      "properties": {
+        "gdshader.trace.server": {
+          "type": "string",
+          "scope": "window",
+          "default": "off",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "description": "Enables tracing of the underlying LSP requests and responses. This results in highly verbose logs (especially the document sync messages) and is not recommended for use outside development and troubleshooting contexts."
+        }
+      }
+    },
     "languages": [
       {
         "id": "gdshader",
