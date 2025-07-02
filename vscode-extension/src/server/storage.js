@@ -22,13 +22,10 @@
  * SOFTWARE.
  */
 const { logger } = require("../log");
+const { getConfiguration } = require("../config");
 const { join } = require("node:path");
 const { platform } = require("node:os");
 const { rm, stat } = require("node:fs/promises");
-
-function getBinName() {
-  return `gdshader-language-server${platform() === "win32" ? ".exe" : ""}`;
-}
 
 /** @param {import('vscode').ExtensionContext} context @returns {string} */
 function getBinCacheDir(context) {
@@ -40,14 +37,29 @@ function getBinDir(context) {
   return join(getBinCacheDir(context), context.extension.packageJSON.version);
 }
 
-/** @param {import('vscode').ExtensionContext} context @returns {string} */
-function getBinPath(context) {
-  return join(getBinDir(context), getBinName());
+/** @param {import('vscode').ExtensionContext} context @returns {Promise<string>} */
+async function getBinPath(context) {
+  const { serverPathOverride } = getConfiguration();
+
+  if (serverPathOverride) {
+    if (!(await fileExists(serverPathOverride))) {
+      throw new Error(
+        `Server path override does not exist: ${serverPathOverride}`,
+      );
+    }
+    logger().warn(`Using server path override: ${serverPathOverride}`);
+    return serverPathOverride;
+  }
+
+  return join(
+    getBinDir(context),
+    `gdshader-language-server${platform() === "win32" ? ".exe" : ""}`,
+  );
 }
 
-/** @param {import('vscode').ExtensionContext} context @returns {string} */
-function getSignaturePath(context) {
-  return getBinPath(context) + ".sig";
+/** @param {import('vscode').ExtensionContext} context @returns {Promise<string>} */
+async function getSignaturePath(context) {
+  return (await getBinPath(context)) + ".sig";
 }
 
 /** @param {import('vscode').ExtensionContext} context @returns {Promise<void>} */
@@ -72,7 +84,6 @@ async function fileExists(path) {
 }
 
 module.exports = {
-  getBinName,
   getBinCacheDir,
   getBinDir,
   getBinPath,

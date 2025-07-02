@@ -27,11 +27,20 @@ const { platform } = require("node:os");
 const { join } = require("node:path");
 const { createVerify } = require("node:crypto");
 const { getBinPath, getSignaturePath } = require("./storage");
+const { getConfiguration } = require("../config");
+const { logger } = require("../log");
 
 function shouldValidateBinarySignature() {
   // MacOS has validation built-in with Gatekeeper, and the MacOS archives do
   // not include signature files.
-  return platform() !== "darwin";
+  if (platform() === "darwin") {
+    return false;
+  }
+  if (getConfiguration().disableSafetyCheck) {
+    logger().warn("Safety check is disabled. This is not recommended.");
+    return false;
+  }
+  return true;
 }
 
 /** @param {import('vscode').ExtensionContext} context @returns {Promise<void>} */
@@ -40,14 +49,15 @@ async function validateBinarySignature(context) {
   const pubKey = await readFile(publicKeyPath, "utf8");
 
   const signature = Buffer.from(
-    (await readFile(getSignaturePath(context), "utf8")).trim(),
+    (await readFile(await getSignaturePath(context), "utf8")).trim(),
     "base64",
   );
 
   const verify = createVerify("sha256");
+  const binPath = await getBinPath(context);
 
   await new Promise((/** @type {(_?: void) => void} */ resolve, reject) => {
-    const stream = createReadStream(getBinPath(context));
+    const stream = createReadStream(binPath);
     stream.on("data", (chunk) => verify.update(chunk));
     stream.on("error", reject);
     stream.on("end", () => {

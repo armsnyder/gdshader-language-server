@@ -84,6 +84,16 @@
             "verbose"
           ],
           "description": "Enables tracing of the underlying LSP requests and responses. This results in highly verbose logs (especially the document sync messages) and is not recommended for use outside development and troubleshooting contexts."
+        },
+        "gdshader.danger.serverPathOverride": {
+          "type": "string",
+          "default": "",
+          "description": "Intended for debugging only. The path to the GDShader language server executable."
+        },
+        "gdshader.danger.disableSafetyCheck": {
+          "type": "boolean",
+          "default": false,
+          "description": "Intended for debugging only. Disables the validation of the GDShader language server executable."
         }
       }
     },

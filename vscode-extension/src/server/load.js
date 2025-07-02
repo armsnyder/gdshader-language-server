@@ -44,11 +44,11 @@ const { downloadAndExtractServerArchive } = require("./download");
 
 /** @param {import('vscode').ExtensionContext} context @returns {Promise<boolean>} */
 async function hasRequiredFiles(context) {
-  if (!(await fileExists(getBinPath(context)))) {
+  if (!(await fileExists(await getBinPath(context)))) {
     return false;
   }
   if (shouldValidateBinarySignature()) {
-    return await fileExists(getSignaturePath(context));
+    return await fileExists(await getSignaturePath(context));
   }
   return true;
 }
