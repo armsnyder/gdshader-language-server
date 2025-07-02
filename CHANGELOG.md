@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0](https://github.com/armsnyder/gdshader-language-server/compare/v0.4.1...v0.5.0) (2025-07-02)
+
+
+### Features
+
+* **vscode:** Add an option to trace LSP messages ([#17](https://github.com/armsnyder/gdshader-language-server/issues/17)) ([6f17cb1](https://github.com/armsnyder/gdshader-language-server/commit/6f17cb107780d623411e129f21e679562181aafa))
+* **vscode:** Add debug options to override the server path ([c3e665a](https://github.com/armsnyder/gdshader-language-server/commit/c3e665ae940882b327362b54fed395d45a13fb0b))
+
+
+### Bug Fixes
+
+* Fix completion errors in files without terminal newline ([8b86a79](https://github.com/armsnyder/gdshader-language-server/commit/8b86a79e53561ddca69096daf8308a262daf9417))
+
 ## [0.4.1](https://github.com/armsnyder/gdshader-language-server/compare/v0.4.0...v0.4.1) (2025-06-30)
 
 
