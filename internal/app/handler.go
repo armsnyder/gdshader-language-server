@@ -56,7 +56,7 @@ func (h *Handler) Initialize(context.Context, lsp.ClientCapabilities) (*lsp.Serv
 func (h *Handler) Completion(_ context.Context, params lsp.CompletionParams) (*lsp.CompletionList, error) {
 	currentWord, c, err := h.getCompletionContext(params)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get current word: %w", err)
+		return nil, fmt.Errorf("failed to get context: %w", err)
 	}
 
 	// TODO(asnyder):
@@ -119,9 +119,15 @@ func (h *Handler) readBetweenPositions(doc *lsp.Document, startPos, endPos lsp.P
 	if err != nil {
 		return nil, fmt.Errorf("start position to offset: %w", err)
 	}
-	endOffset, err := doc.PositionToOffset(endPos)
-	if err != nil {
-		return nil, fmt.Errorf("end position to offset: %w", err)
+
+	var endOffset int
+	if endPos.Line >= doc.Lines()-1 {
+		endOffset = doc.Len()
+	} else {
+		endOffset, err = doc.PositionToOffset(endPos)
+		if err != nil {
+			return nil, fmt.Errorf("end position to offset: %w", err)
+		}
 	}
 
 	return io.ReadAll(io.NewSectionReader(doc, int64(startOffset), int64(endOffset-startOffset)))

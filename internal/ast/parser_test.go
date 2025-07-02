@@ -30,7 +30,7 @@ import (
 
 	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/armsnyder/gdshader-language-server/internal/ast"
-	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/samber/lo"
 
 	. "github.com/onsi/gomega"
@@ -81,4 +81,4 @@ func TestCanParseAllValidPrograms(t *testing.T) {
 	}
 }
 
-var IgnorePos = cmp.FilterValues(func(_, _ lexer.Position) bool { return true }, cmp.Ignore())
+var IgnorePos = cmpopts.IgnoreTypes(lexer.Position{})

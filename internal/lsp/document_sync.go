@@ -296,6 +296,13 @@ func utf16Width(r rune) int {
 	return 2
 }
 
+// Lines returns the number of lines in the document. A single line ending in
+// a newline character is counted as two lines. This is consistent with the
+// LSP specification.
+func (d *Document) Lines() int {
+	return len(d.lineStart)
+}
+
 // ArrayBuffer is the simplest implementation of Buffer, using a byte slice
 // for storage. It is optimized for reads. Insertions and deletions are O(n)
 // due to slice copying.

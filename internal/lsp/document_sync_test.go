@@ -89,7 +89,17 @@ func parsePos(s string) lsp.Position {
 	return lsp.Position{Line: line, Character: char}
 }
 
-func TestDocument_ApplyChange(t *testing.T) {
+func TestDocument(t *testing.T) {
+	for _, impl := range bufferImplementations {
+		t.Run(bufferName(impl), func(t *testing.T) {
+			t.Run("ApplyChange", func(t *testing.T) { testApplyChange(t, impl) })
+			t.Run("ApplyChange_Error", func(t *testing.T) { testApplyChangeError(t, impl) })
+			t.Run("PositionToOffset", func(t *testing.T) { testPositionToOffset(t, impl) })
+		})
+	}
+}
+
+func testApplyChange(t *testing.T, impl lsp.Buffer) {
 	tests := []struct {
 		name    string
 		initial string
@@ -164,25 +174,71 @@ func TestDocument_ApplyChange(t *testing.T) {
 		},
 	}
 
-	for _, impl := range bufferImplementations {
-		t.Run(bufferName(impl), func(t *testing.T) {
-			for _, tt := range tests {
-				t.Run(tt.name, func(t *testing.T) {
-					g := NewWithT(t)
-					testutil.SetupLogger(t)
-					doc := lsp.NewDocument([]byte(tt.initial), newBuffer(impl))
-					for i, change := range tt.changes {
-						err := doc.ApplyChange(change)
-						g.Expect(err).ToNot(HaveOccurred(), "ApplyChange #%d failed", i+1)
-					}
-					g.Expect(string(doc.Bytes())).To(BeComparableTo(tt.want))
-				})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewWithT(t)
+			testutil.SetupLogger(t)
+			doc := lsp.NewDocument([]byte(tt.initial), newBuffer(impl))
+			for i, change := range tt.changes {
+				err := doc.ApplyChange(change)
+				g.Expect(err).ToNot(HaveOccurred(), "ApplyChange #%d failed", i+1)
+			}
+			g.Expect(string(doc.Bytes())).To(BeComparableTo(tt.want))
+		})
+	}
+}
+
+func testPositionToOffset(t *testing.T, impl lsp.Buffer) {
+	tests := []struct {
+		name     string
+		initial  string
+		position lsp.Position
+		want     int
+		wantErr  bool
+	}{
+		{
+			name:     "position in single line",
+			initial:  "hello world",
+			position: lsp.Position{Line: 0, Character: 5},
+			want:     5,
+		},
+		{
+			name:     "position in multi-line",
+			initial:  "hello\nworld",
+			position: lsp.Position{Line: 1, Character: 2},
+			want:     8,
+		},
+		{
+			name:     "position in multi-line with CRLF",
+			initial:  "hello\r\nworld",
+			position: lsp.Position{Line: 1, Character: 2},
+			want:     9,
+		},
+		{
+			name:     "position at end of document",
+			initial:  "hello world",
+			position: lsp.Position{Line: 0, Character: 11},
+			want:     11,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewWithT(t)
+			testutil.SetupLogger(t)
+			doc := lsp.NewDocument([]byte(tt.initial), newBuffer(impl))
+			offset, err := doc.PositionToOffset(tt.position)
+			if tt.wantErr {
+				g.Expect(err).To(HaveOccurred(), "expected error for position %v", tt.position)
+			} else {
+				g.Expect(err).ToNot(HaveOccurred(), "unexpected error for position %v", tt.position)
+				g.Expect(offset).To(BeEquivalentTo(tt.want), "unexpected offset for position %v", tt.position)
 			}
 		})
 	}
 }
 
-func TestDocument_ApplyChange_Error(t *testing.T) {
+func testApplyChangeError(t *testing.T, impl lsp.Buffer) {
 	tests := []struct {
 		name    string
 		initial string
@@ -200,14 +256,10 @@ func TestDocument_ApplyChange_Error(t *testing.T) {
 		},
 	}
 
-	for _, impl := range bufferImplementations {
-		t.Run(bufferName(impl), func(t *testing.T) {
-			for _, tt := range tests {
-				t.Run(tt.name, func(t *testing.T) {
-					doc := lsp.NewDocument([]byte(tt.initial), newBuffer(impl))
-					NewWithT(t).Expect(doc.ApplyChange(tt.change)).ToNot(Succeed())
-				})
-			}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			doc := lsp.NewDocument([]byte(tt.initial), newBuffer(impl))
+			NewWithT(t).Expect(doc.ApplyChange(tt.change)).ToNot(Succeed())
 		})
 	}
 }
