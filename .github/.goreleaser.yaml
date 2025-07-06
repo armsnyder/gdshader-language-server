@@ -91,3 +91,10 @@ signs:
 # https://goreleaser.com/customization/release
 release:
   ids: [archives, cosign-checksum]
+
+# https://goreleaser.com/customization/homebrew_casks
+homebrew_casks:
+  - ids: [archives]
+    repository:
+      owner: armsnyder
+      name: homebrew-tap
