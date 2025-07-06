@@ -47,36 +47,36 @@ aims to be memory-efficient and editor-agnostic.
 
 ### Neovim
 
-#### 1. Choose an installation method
+1. Choose an installation method
 
-##### Homebrew
+   **Homebrew**
 
-```shell
-brew install armsnyder/tap/gdshader-language-server
-```
+   ```shell
+   brew install armsnyder/tap/gdshader-language-server
+   ```
 
-##### Go
+   **Go**
 
-```shell
-go install github.com/armsnyder/gdshader-language-server@latest
-```
+   ```shell
+   go install github.com/armsnyder/gdshader-language-server@latest
+   ```
 
-##### Github Releases
+   **Github Releases**
 
-[Go to releases](https://github.com/armsnyder/gdshader-language-server/releases)
+   [Go to releases](https://github.com/armsnyder/gdshader-language-server/releases)
 
-#### 2. Configure Neovim
+2. Configure Neovim
 
-Create a `~/.config/nvim/after/ftplugin/gdshader.lua` file with the
-following content, assuming `gdshader-language-server` is in your `$PATH`:
+   Create a `~/.config/nvim/after/ftplugin/gdshader.lua` file with the
+   following content, assuming `gdshader-language-server` is in your `$PATH`:
 
-```lua
-vim.lsp.start({
-  name = "gdshader",
-  cmd = { 'gdshader-language-server' },
-  capabilities = vim.lsp.protocol.make_client_capabilities(),
-})
-```
+   ```lua
+   vim.lsp.start({
+     name = "gdshader",
+     cmd = { 'gdshader-language-server' },
+     capabilities = vim.lsp.protocol.make_client_capabilities(),
+   })
+   ```
 
 ## Roadmap
 
