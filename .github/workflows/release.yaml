@@ -22,6 +22,9 @@ jobs:
         with:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          repositories: |
+            gdshader-language-server
+            homebrew-tap
       - name: Build and upload assets
         uses: goreleaser/goreleaser-action@v6
         with:
