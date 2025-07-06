@@ -80,6 +80,10 @@ Planned features:
 - [x] Basic shader-type-dependent global built-in completion
       (`VERTEX`, `NORMAL`, etc.)
 - [x] VSCode wrapper extension
+- [x] [Grammar](https://code.visualstudio.com/api/references/contribution-points#contributes.grammars)
+      for the VSCode extension
+- [ ] Make the code more maintainable by generating rules based on the official
+      Godot documentation
 - [ ] Built-ins for shader types other than `spatial`
 - [ ] More advanced completion (functions, variables, etc.)
 - [ ] Go to definition
@@ -87,10 +91,6 @@ Planned features:
 - [ ] Formatting
 - [ ] Hover (show documentation)
 - [ ] Signature help
-- [ ] Make the code more maintainable by generating rules based on the official
-      Godot documentation
-- [ ] [Grammar](https://code.visualstudio.com/api/references/contribution-points#contributes.grammars)
-      for the VSCode extension
 
 ## 🤝 Contributing
 
