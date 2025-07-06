@@ -95,6 +95,8 @@ release:
 # https://goreleaser.com/customization/homebrew_casks
 homebrew_casks:
   - ids: [archives]
+    description: Language server for .gdshader files
+    homepage: https://github.com/armsnyder/gdshader-language-server
     repository:
       owner: armsnyder
       name: homebrew-tap
