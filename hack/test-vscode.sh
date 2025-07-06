@@ -11,9 +11,8 @@ version=0.0.$(date +%s)
 code --install-extension tmp/package/gdshader-language-server-"$version".vsix --force
 cat <<EOF >test-project/.vscode/settings.json
 {
-  "gdshader.trace.server": "verbose",
   "gdshader.danger.disableSafetyCheck": true,
-  "gdshader.danger.serverPathOverride": "\${workspaceFolder}/../tmp/bin/gdshader-language-server",
+  "gdshader.danger.serverPathOverride": "$(pwd)/tmp/bin/gdshader-language-server",
 }
 EOF
 code --disable-extensions test-project
