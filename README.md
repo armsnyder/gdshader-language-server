@@ -47,21 +47,21 @@ aims to be memory-efficient and editor-agnostic.
 
 ### Neovim
 
-#### 1. Install the server
+#### 1. Choose an installation method
 
-##### Using Homebrew
+##### Homebrew
 
 ```shell
 brew install armsnyder/tap/gdshader-language-server
 ```
 
-##### Using Go
+##### Go
 
 ```shell
 go install github.com/armsnyder/gdshader-language-server@latest
 ```
 
-##### Using Github Releases
+##### Github Releases
 
 [Go to releases](https://github.com/armsnyder/gdshader-language-server/releases)
 
