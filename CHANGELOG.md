@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/armsnyder/gdshader-language-server/compare/v0.5.0...v0.6.0) (2025-07-06)
+
+
+### Features
+
+* **vscode:** Grammar for basic syntax highlighting ([#43](https://github.com/armsnyder/gdshader-language-server/issues/43)) ([aa8cebf](https://github.com/armsnyder/gdshader-language-server/commit/aa8cebf04501d0b7229111cb9364244f01ef296e))
+
 ## [0.5.0](https://github.com/armsnyder/gdshader-language-server/compare/v0.4.1...v0.5.0) (2025-07-02)
 
 
