@@ -40,3 +40,6 @@ define render_coverage
 	go tool cover -html $(1)/cover.out -o $(1)/cover.html
 	go tool covdata percent -i $(1)
 endef
+
+test-vscode:
+	./hack/test-vscode.sh

@@ -2,3 +2,4 @@
 *.test
 /gdshader-language-server
 /dist/
+/test-project/
