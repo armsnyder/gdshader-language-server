@@ -25,12 +25,19 @@ jobs:
           repositories: |
             gdshader-language-server
             homebrew-tap
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: Build and upload assets
         uses: goreleaser/goreleaser-action@v6
         with:
           version: '~> v2'
           args: release --config .github/.goreleaser.yaml --clean
         env:
+          COMMIT_AUTHOR_NAME: '${{ steps.app-token.outputs.app-slug }}[bot]'
+          COMMIT_AUTHOR_EMAIL: '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           MACOS_SIGN_P12: ${{ secrets.MACOS_SIGN_P12 }}
           MACOS_SIGN_PASSWORD: ${{ secrets.MACOS_SIGN_PASSWORD }}

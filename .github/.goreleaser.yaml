@@ -101,3 +101,6 @@ homebrew_casks:
     repository:
       owner: armsnyder
       name: homebrew-tap
+    commit_author:
+      name: "{{ .Env.COMMIT_AUTHOR_NAME }}"
+      email: "{{ .Env.COMMIT_AUTHOR_EMAIL }}"
