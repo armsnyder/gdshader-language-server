@@ -41,36 +41,42 @@ aims to be memory-efficient and editor-agnostic.
 
 ## 📦 Install
 
-### Neovim
-
-1. Download the [latest release](https://github.com/armsnyder/gdshader-language-server/releases/latest)
-   or build from source:
-
-   ```shell
-   wget https://github.com/armsnyder/gdshader-language-server/releases/latest/download/gdshader-language-server_$(uname -s)_$(uname -m).tar.gz
-   ```
-
-   _or_
-
-   ```shell
-   go install github.com/armsnyder/gdshader-language-server@latest
-   ```
-
-1. Create a `~/.config/nvim/after/ftplugin/gdshader.lua` file with the
-   following content, adjusting the path to the `gdshader-language-server`
-   binary if necessary:
-
-   ```lua
-   vim.lsp.start({
-     name = "gdshader",
-     cmd = { vim.fs.expand('~/go/bin/gdshader-language-server') },
-     capabilities = vim.lsp.protocol.make_client_capabilities(),
-   })
-   ```
-
 ### VSCode
 
 [Install the extension](https://marketplace.visualstudio.com/items?itemName=armsnyder.gdshader-language-server)
+
+### Neovim
+
+#### 1. Install the server
+
+##### Using Homebrew
+
+```shell
+brew install armsnyder/tap/gdshader-language-server
+```
+
+##### Using Go
+
+```shell
+go install github.com/armsnyder/gdshader-language-server@latest
+```
+
+##### Using Github Releases
+
+[Go to releases](https://github.com/armsnyder/gdshader-language-server/releases)
+
+#### 2. Configure Neovim
+
+Create a `~/.config/nvim/after/ftplugin/gdshader.lua` file with the
+following content, assuming `gdshader-language-server` is in your `$PATH`:
+
+```lua
+vim.lsp.start({
+  name = "gdshader",
+  cmd = { 'gdshader-language-server' },
+  capabilities = vim.lsp.protocol.make_client_capabilities(),
+})
+```
 
 ## Roadmap
 
