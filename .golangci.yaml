@@ -44,7 +44,9 @@ linters:
       disabled-checks:
         - whyNoLint
     goheader:
-      template-path: LICENSE
+      template: |-
+        Copyright (c) 2025 Adam Snyder <https://armsnyder.com> and contributors
+        SPDX-License-Identifier: MIT
     revive:
       enable-all-rules: true
       rules:

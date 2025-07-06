@@ -48,7 +48,10 @@ export default defineConfig([
       "headers/header-format": [
         "error",
         {
-          source: "file",
+          source: "string",
+          content:
+            "Copyright (c) 2025 Adam Snyder <https://armsnyder.com> and contributors\n" +
+            "SPDX-License-Identifier: MIT",
           path: "../LICENSE",
         },
       ],
