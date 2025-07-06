@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://www.schemastore.org/tmlanguage.json
+
+scopeName: source.gdshader
+
+patterns:
+  - name: comment.line.double-slash.gdshader
+    match: "//.*"
+
+  - name: comment.block.gdshader
+    begin: '/\*'
+    end: '\*/'
+
+  - name: keyword.control.gdshader
+    match: \b(if|else|for|while|do|switch|case|break|continue|return|discard)\b
+
+  - name: support.type.datatype.gdshader
+    match: \b(void|bool|u?int|float|[biu]?vec[234]|mat[234]|sampler[23]D(Array)?|samplerCube(Array)?|samplerExternalOES|[iu]sampler[23]D)\b
+
+  - name: storage.modifier.gdshader
+    match: \b(const|uniform|instance|global|in|out|inout|varying)\b
+
+  - name: keyword.other.gdshader
+    match: \b(struct|group_uniforms|shader_type|render_mode)\b
+
+  - name: keyword.control.preprocessor.gdshader
+    match: '(?<=^\s*)#\w+'
+
+    # TODO(asnyder): Add support types for other built-ins, like shader types and render modes.
+
+  - name: support.type.hint.gdshader
+    match: '(?<=\buniform\b.+:.*)((hint|filter|repeat)(_[a-z]+)+|source_color)\b'
+
+  - name: keyword.operator.gdshader
+    match: '[+\-*/%=!<>&|^~?:]+'
+
+  - name: constant.numeric.gdshader
+    match: \b(0x)?\d+(\.\d+)?([eE][+\-]?\d+)?\b
+
+  - name: entity.name.function.gdshader
+    match: \b([a-zA-Z_][a-zA-Z0-9_]*)(?=\s*\()
+
+  - name: entity.name.type.struct.gdshader
+    match: \b(?<=struct\s+)([a-zA-Z_][a-zA-Z0-9_]*)\b(?=\s*\{)
+
+  - name: constant.language.gdshader
+    match: \b(true|false|[A-Z_][A-Z0-9_]*)\b
+
+  - name: entity.name.type.gdshader
+    match: \b([a-zA-Z_][a-zA-Z0-9_]*)(?=\s+[a-zA-Z_][a-zA-Z0-9_]*\s*\W)
+
+  - name: variable.name.gdshader
+    match: \b([a-zA-Z_][a-zA-Z0-9_]*)\b

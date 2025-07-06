@@ -1,6 +1,7 @@
 /node_modules/
 /.vscode-test/
 *.vsix
+*.tmLanguage.json
 
 # These files are copied from the repo root during CI
 /cosign.pub

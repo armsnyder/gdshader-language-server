@@ -13,7 +13,7 @@
     "format:check": "prettier --check .",
     "test": "vscode-test",
     "typecheck": "tsc",
-    "prepackage": "cp ../cosign.pub ../CHANGELOG.md ../LICENSE .",
+    "prepackage": "cp ../cosign.pub ../CHANGELOG.md ../LICENSE . && npx js-yaml syntaxes/gdshader.tmLanguage.yaml > syntaxes/gdshader.tmLanguage.json",
     "package": "npm run prepackage && vsce package",
     "publish": "npm run prepackage && vsce publish"
   },
@@ -37,16 +37,19 @@
     "@vscode/vsce": "^3.6.0",
     "eslint": "^9.30.0",
     "eslint-plugin-headers": "^1.3.3",
+    "js-yaml": "^4.1.0",
     "prettier": "^3.6.2"
   },
   "files": [
     "src",
     "node_modules",
+    "syntaxes/*.json",
     "cosign.pub",
     "icon.png",
     "language-configuration.json",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "publisher": "armsnyder",
   "displayName": "GDShader",
@@ -105,6 +108,13 @@
           ".gdshaderinc"
         ],
         "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "gdshader",
+        "scopeName": "source.gdshader",
+        "path": "./syntaxes/gdshader.tmLanguage.json"
       }
     ],
     "commands": [
