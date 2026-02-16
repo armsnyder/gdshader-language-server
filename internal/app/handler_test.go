@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Adam Snyder <https://armsnyder.com> and contributors
+// Copyright (c) 2026 Adam Snyder <https://armsnyder.com> and contributors
 // SPDX-License-Identifier: MIT
 
 package app_test
