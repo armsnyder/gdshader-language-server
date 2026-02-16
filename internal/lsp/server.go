@@ -29,6 +29,7 @@ type Handler interface {
 	DocumentSyncHandler
 	Initialize(ctx context.Context, clientCapabilities ClientCapabilities) (*ServerCapabilities, error)
 	Completion(ctx context.Context, params CompletionParams) (*CompletionList, error)
+	Hover(ctx context.Context, params HoverParams) (*Hover, error)
 }
 
 // Server manages the LSP server lifecycle and dispatching requests and
@@ -227,6 +228,13 @@ func (s *Server) handleRequest(method string, paramsRaw json.RawMessage) (any, e
 			return nil, err
 		}
 		return s.Handler.Completion(context.TODO(), params)
+
+	case "textDocument/hover":
+		var params HoverParams
+		if err := parseParams(paramsRaw, &params); err != nil {
+			return nil, err
+		}
+		return s.Handler.Hover(context.TODO(), params)
 
 	default:
 		return nil, &ResponseError{
