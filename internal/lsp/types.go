@@ -194,6 +194,17 @@ type CompletionParams struct {
 	TextDocumentPositionParams
 }
 
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#hoverParams
+type HoverParams struct {
+	TextDocumentPositionParams
+}
+
+// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#hover
+type Hover struct {
+	Contents MarkupContent `json:"contents"`
+	Range    *Range        `json:"range,omitempty"`
+}
+
 // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#completionList
 type CompletionList struct {
 	IsIncomplete bool             `json:"isIncomplete"`

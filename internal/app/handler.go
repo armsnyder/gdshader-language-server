@@ -30,7 +30,63 @@ func (h *Handler) Initialize(context.Context, lsp.ClientCapabilities) (*lsp.Serv
 			Change:    lsp.SyncIncremental,
 		},
 		CompletionProvider: &lsp.CompletionOptions{},
+		HoverProvider:      true,
 	}, nil
+}
+
+// Hover implements lsp.Handler.
+func (h *Handler) Hover(_ context.Context, params lsp.HoverParams) (*lsp.Hover, error) {
+	word, err := h.getWordAtPosition(params.TextDocumentPositionParams)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get word: %w", err)
+	}
+
+	if word == "" {
+		return nil, nil
+	}
+
+	for _, item := range completionItems {
+		if item.item.Label == word && item.item.Documentation != nil {
+			return &lsp.Hover{
+				Contents: *item.item.Documentation,
+			}, nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (h *Handler) getWordAtPosition(params lsp.TextDocumentPositionParams) (string, error) {
+	doc, ok := h.Documents[params.TextDocument.URI]
+	if !ok {
+		return "", fmt.Errorf("document not found: %s", params.TextDocument.URI)
+	}
+
+	line, err := h.readLine(doc, params.Position.Line)
+	if err != nil {
+		return "", fmt.Errorf("reading line: %w", err)
+	}
+
+	tokens := tokenize(line)
+	offset := 0
+	for _, token := range tokens {
+		tokenStart := strings.Index(string(line[offset:]), token)
+		if tokenStart < 0 {
+			continue
+		}
+		tokenStart += offset
+		tokenEnd := tokenStart + len(token)
+		if params.Position.Character >= tokenStart && params.Position.Character < tokenEnd {
+			r, _ := utf8.DecodeRuneInString(token)
+			if unicode.IsLetter(r) || r == '_' {
+				return token, nil
+			}
+			return "", nil
+		}
+		offset = tokenEnd
+	}
+
+	return "", nil
 }
 
 // Completion implements lsp.Handler.
