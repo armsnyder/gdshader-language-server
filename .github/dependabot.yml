@@ -21,6 +21,11 @@ updates:
     groups:
       Actions:
         patterns: ["*"]
+    ignore:
+      - dependency-name: "@types/vscode"
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
   - package-ecosystem: npm
     directory: /vscode-extension
     schedule:
