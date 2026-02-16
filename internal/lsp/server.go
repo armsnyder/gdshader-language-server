@@ -157,6 +157,7 @@ func jsonRPCSplit(data []byte, _ bool) (advance int, token []byte, err error) {
 }
 
 func (s *Server) handleNotification(method string, paramsRaw json.RawMessage) error {
+	//revive:disable-next-line:identical-switch-branches
 	switch method {
 	case "initialized":
 

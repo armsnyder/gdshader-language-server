@@ -27,7 +27,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version-file: .tool-versions
       - name: Generate tables
         run: go run ./internal/tools/gentables
       - name: Commit changes

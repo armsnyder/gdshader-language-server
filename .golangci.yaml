@@ -16,6 +16,7 @@ linters:
     - revive
     - sloglint
     - staticcheck
+    - testpackage
     - unused
   settings:
     depguard:
@@ -56,6 +57,8 @@ linters:
           arguments: [15] # Default 7
         - name: cyclomatic
           arguments: [15] # Default 10
+        - name: enforce-switch-style
+          arguments: [allowNoDefault]
         - name: line-length-limit
           disabled: true # Too strict
         - name: max-public-structs
@@ -66,6 +69,10 @@ linters:
           disabled: true # Not a lib
         - name: unused-receiver
           disabled: true # Too common
+        - name: unhandled-error
+          disabled: true # Using errcheck for this
+        - name: var-naming
+          arguments: [[], [], [{ skip-package-name-checks: true }]] # Some of our packages collide with stdlib, but it's okay
     sloglint:
       msg-style: capitalized
       key-naming-case: snake

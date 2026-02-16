@@ -15,7 +15,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: .tool-versions
       - name: Build
         run: go build ./...
   tidy:
@@ -27,7 +27,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: .tool-versions
       - name: Verify that go.mod is already tidy
         run: test -z "$(go mod tidy -diff)"
   test:
@@ -39,7 +39,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: .tool-versions
       - name: Run tests
         run: make test
       - name: Update coverage badge
@@ -100,11 +100,11 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: .tool-versions
       - name: Run linter
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.1
+          version-file: .tool-versions
   release:
     name: Release
     runs-on: ubuntu-latest
