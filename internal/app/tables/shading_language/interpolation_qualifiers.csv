@@ -1,0 +1,3 @@
+Qualifier,Description
+**flat**,The value is not interpolated.
+**smooth**,The value is interpolated in a perspective-correct fashion. This is the default.

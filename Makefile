@@ -43,3 +43,6 @@ endef
 
 test-vscode:
 	./hack/test-vscode.sh
+
+gentables:
+	go run ./internal/tools/gentables

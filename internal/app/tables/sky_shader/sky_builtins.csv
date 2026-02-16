@@ -1,0 +1,9 @@
+Built-in,Description
+in vec3 **EYEDIR**,Normalized direction of the current pixel. Use this as your basic direction for procedural effects.
+in vec2 **SCREEN_UV**,Screen UV coordinate for the current pixel. Used to map a texture to the full screen.
+in vec2 **SKY_COORDS**,Sphere UV. Used to map a panorama texture to the sky.
+in vec4 **HALF_RES_COLOR**,Color value of the corresponding pixel from the half resolution pass. Uses linear filter.
+in vec4 **QUARTER_RES_COLOR**,Color value of the corresponding pixel from the quarter resolution pass. Uses linear filter.
+out vec3 **COLOR**,Output color.
+out float **ALPHA**,"Output alpha value, can only be used in subpasses."
+out vec4 **FOG**,

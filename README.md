@@ -113,6 +113,7 @@ existing code conventions.
 └── internal
     ├── app       # Main application logic
     ├── ast       # .gdshader file parser library (application agnostic)
+    ├── tools     # Local development scripts
     ├── lsp       # LSP server library (application agnostic)
     └── testutil  # Test utilities for all packages
 ```

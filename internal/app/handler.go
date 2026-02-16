@@ -45,8 +45,13 @@ func (h *Handler) Hover(_ context.Context, params lsp.HoverParams) (*lsp.Hover, 
 		return nil, nil
 	}
 
+	_, c, err := h.getCompletionContext(lsp.CompletionParams(params))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get completion context: %w", err)
+	}
+
 	for _, item := range completionItems {
-		if item.item.Label == word && item.item.Documentation != nil {
+		if item.item.Label == word && item.item.Documentation != nil && item.predicate(*c) {
 			return &lsp.Hover{
 				Contents: *item.item.Documentation,
 			}, nil
@@ -56,6 +61,7 @@ func (h *Handler) Hover(_ context.Context, params lsp.HoverParams) (*lsp.Hover, 
 	return nil, nil
 }
 
+// getWordAtPosition returns the identifier under the cursor using tokenized line offsets.
 func (h *Handler) getWordAtPosition(params lsp.TextDocumentPositionParams) (string, error) {
 	doc, ok := h.Documents[params.TextDocument.URI]
 	if !ok {
@@ -70,13 +76,14 @@ func (h *Handler) getWordAtPosition(params lsp.TextDocumentPositionParams) (stri
 	tokens := tokenize(line)
 	offset := 0
 	for _, token := range tokens {
+		// Search from the previous token end so repeated tokens map to the correct occurrence.
 		tokenStart := strings.Index(string(line[offset:]), token)
 		if tokenStart < 0 {
 			continue
 		}
 		tokenStart += offset
 		tokenEnd := tokenStart + len(token)
-		if params.Position.Character >= tokenStart && params.Position.Character < tokenEnd {
+		if isWithinToken(params.Position.Character, tokenStart, tokenEnd, token) {
 			r, _ := utf8.DecodeRuneInString(token)
 			if unicode.IsLetter(r) || r == '_' {
 				return token, nil
@@ -87,6 +94,19 @@ func (h *Handler) getWordAtPosition(params lsp.TextDocumentPositionParams) (stri
 	}
 
 	return "", nil
+}
+
+// isWithinToken handles both in-token and end-of-token cursor positions for hover compatibility.
+func isWithinToken(charPos, tokenStart, tokenEnd int, token string) bool {
+	if charPos >= tokenStart && charPos < tokenEnd {
+		return true
+	}
+	// Some clients report hover positions at the end of a word.
+	if charPos == tokenEnd {
+		r, _ := utf8.DecodeRuneInString(token)
+		return unicode.IsLetter(r) || r == '_'
+	}
+	return false
 }
 
 // Completion implements lsp.Handler.
@@ -111,6 +131,7 @@ func (h *Handler) Completion(_ context.Context, params lsp.CompletionParams) (*l
 	}, nil
 }
 
+// getCompletionContext derives shader type, current function, and prior tokens for predicate filtering.
 func (h *Handler) getCompletionContext(params lsp.CompletionParams) (currentWord string, c *completionContext, err error) {
 	doc, ok := h.Documents[params.TextDocument.URI]
 	if !ok {
@@ -151,6 +172,7 @@ func (h *Handler) getCompletionContext(params lsp.CompletionParams) (currentWord
 	return tokens[len(tokens)-1], c, nil
 }
 
+// readBetweenPositions reads raw bytes between two LSP positions in one document.
 func (h *Handler) readBetweenPositions(doc *lsp.Document, startPos, endPos lsp.Position) ([]byte, error) {
 	startOffset, err := doc.PositionToOffset(startPos)
 	if err != nil {
@@ -170,6 +192,7 @@ func (h *Handler) readBetweenPositions(doc *lsp.Document, startPos, endPos lsp.P
 	return io.ReadAll(io.NewSectionReader(doc, int64(startOffset), int64(endOffset-startOffset)))
 }
 
+// readLine reads one line by translating line boundaries into document byte ranges.
 func (h *Handler) readLine(doc *lsp.Document, lineNumber int) ([]byte, error) {
 	startPos := lsp.Position{Line: lineNumber, Character: 0}
 	endPos := lsp.Position{Line: lineNumber + 1, Character: 0}
@@ -182,24 +205,63 @@ func (h *Handler) readLine(doc *lsp.Document, lineNumber int) ([]byte, error) {
 	return line, nil
 }
 
+// getCurrentFunction returns the innermost function containing the cursor position.
 func (h *Handler) getCurrentFunction(doc *lsp.Document, pos lsp.Position) (string, error) {
-	for lineNumber := pos.Line; lineNumber >= 0; lineNumber-- {
-		line, err := h.readLine(doc, lineNumber)
-		if err != nil {
-			return "", fmt.Errorf("reading line %d: %w", lineNumber, err)
-		}
+	text, err := h.readBetweenPositions(doc, lsp.Position{Line: 0, Character: 0}, pos)
+	if err != nil {
+		return "", fmt.Errorf("reading document prefix: %w", err)
+	}
 
-		tokens := tokenize(line)
-		for i := len(tokens) - 2; i > 1; i-- {
-			if tokens[i] == ")" && tokens[i+1] == "{" {
-				return tokens[1], nil
-			}
+	return currentFunctionFromPrefix(text), nil
+}
+
+// currentFunctionFromPrefix scans backwards through source bytes and finds the nearest enclosing function.
+func currentFunctionFromPrefix(prefix []byte) string {
+	depth := 0
+	for i := len(prefix) - 1; i >= 0; i-- {
+		if prefix[i] == '}' {
+			depth++
+			continue
+		}
+		if prefix[i] != '{' {
+			continue
+		}
+		if depth > 0 {
+			depth--
+			continue
+		}
+		if name := functionNameBeforeBrace(prefix[:i]); name != "" {
+			return name
 		}
 	}
 
-	return "", nil
+	return ""
 }
 
+// functionNameBeforeBrace extracts a likely function name from the nearest header before an opening brace.
+func functionNameBeforeBrace(prefix []byte) string {
+	header := string(prefix)
+	if lineStart := strings.LastIndexByte(header, '\n'); lineStart >= 0 {
+		header = header[lineStart+1:]
+	}
+	header = strings.TrimSpace(header)
+	if header == "" {
+		return ""
+	}
+
+	beforeParen, _, hasParen := strings.Cut(header, "(")
+	if !hasParen {
+		return ""
+	}
+	parts := strings.Fields(beforeParen)
+	if len(parts) < 2 {
+		return ""
+	}
+
+	return parts[len(parts)-1]
+}
+
+// tokenize splits a line into word tokens and standalone punctuation tokens.
 func tokenize(line []byte) []string {
 	var tokens []string
 

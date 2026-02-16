@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
+name: Update Tables
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'
+jobs:
+  update:
+    name: Update
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Create app token
+        uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Generate tables
+        run: go run ./internal/tools/gentables
+      - name: Commit changes
+        run: |
+          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
+          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
+          git add internal/app/tables
+          if [ -z "$(git diff --cached --stat)" ]; then
+            echo "No changes to commit."
+          else
+            branch="bot/update-tables/$(date +%Y%m%d%H%M%S)"
+            git checkout -b "$branch"
+            git commit -m "feat: update tabular data with latest Godot documentation"
+            git push origin "$branch"
+            gh pr create --title "feat: update tabular data with latest Godot documentation" --body "Updated tabular data to match the latest Godot documentation" --base main --head "$branch" --label "bot"
+          fi
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}

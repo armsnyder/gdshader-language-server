@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp/cmpopts"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/types"
 
 	"github.com/armsnyder/gdshader-language-server/internal/app"
 	"github.com/armsnyder/gdshader-language-server/internal/lsp"
@@ -51,41 +52,94 @@ func TestHandler(t *testing.T) {
 
 func TestHandler_Hover(t *testing.T) {
 	tests := []struct {
-		name         string
-		document     string
-		position     lsp.Position
-		wantNil      bool
-		wantContains string
+		name     string
+		document string
+		seek     func(document string) lsp.Position
+		want     types.GomegaMatcher
 	}{
 		{
-			name:         "Keyword",
-			document:     "shader_type spatial;\n",
-			position:     lsp.Position{Line: 0, Character: 3},
-			wantContains: "shader",
+			name:     "Keyword",
+			document: "shader_type spatial;\n",
+			seek:     toMiddle("shader_type"),
+			want:     valueTo(ContainSubstring("shader")),
 		},
 		{
-			name:         "DataType",
-			document:     "uniform vec3 color;\n",
-			position:     lsp.Position{Line: 0, Character: 9},
-			wantContains: "vector",
+			name:     "KeywordAtEnd",
+			document: "shader_type spatial;\n",
+			seek:     toAfter("shader_type"),
+			want:     valueTo(ContainSubstring("Declares the shader type")),
+		},
+		{
+			name:     "StencilModeKeyword",
+			document: "shader_type spatial;\nstencil_mode compare_always;\n",
+			seek:     toMiddle("stencil_mode"),
+			want:     valueTo(ContainSubstring("Declares one or more stencil modes")),
+		},
+		{
+			name:     "GroupUniformsAtEnd",
+			document: "group_uniforms MyGroup;\n",
+			seek:     toAfter("group_uniforms"),
+			want:     valueTo(ContainSubstring("Groups uniforms together")),
+		},
+		{
+			name:     "DataType",
+			document: "uniform vec3 color;\n",
+			seek:     toMiddle("vec3"),
+			want:     valueTo(ContainSubstring("vector")),
+		},
+		{
+			name:     "DataTypeIncludesGDScriptType",
+			document: "uniform vec3 color;\n",
+			seek:     toMiddle("vec3"),
+			want:     valueTo(ContainSubstring("GDScript type:")),
+		},
+		{
+			name:     "UniformHint",
+			document: "uniform sampler2D tex : hint_normal;\n",
+			seek:     toMiddle("hint_normal"),
+			want:     valueTo(ContainSubstring("Used as normalmap")),
+		},
+		{
+			name:     "UniformHintSourceColorVec",
+			document: "uniform vec3 color : source_color;\n",
+			seek:     toMiddle("source_color"),
+			want:     valueTo(ContainSubstring("Used as color")),
+		},
+		{
+			name:     "UniformHintSourceColorSampler",
+			document: "uniform sampler2D tex : source_color;\n",
+			seek:     toMiddle("source_color"),
+			want:     valueTo(ContainSubstring("Used as albedo color")),
 		},
 		{
 			name:     "UnknownWord",
 			document: "uniform vec3 my_color;\n",
-			position: lsp.Position{Line: 0, Character: 15},
-			wantNil:  true,
+			seek:     toMiddle("my_color"),
+			want:     BeNil(),
 		},
 		{
 			name:     "Whitespace",
 			document: "uniform   vec3 color;\n",
-			position: lsp.Position{Line: 0, Character: 8},
-			wantNil:  true,
+			seek:     toOffset("uniform", len("uniform")+2),
+			want:     BeNil(),
 		},
 		{
-			name:         "BuiltInConstant",
-			document:     "shader_type spatial;\nvoid vertex() {\nVERTEX = vec3(0.0);\n}\n",
-			position:     lsp.Position{Line: 2, Character: 2},
-			wantContains: "vertex",
+			name:     "BuiltInConstant",
+			document: "shader_type spatial;\nvoid vertex() {\nVERTEX = vec3(0.0);\n}\n",
+			seek:     toMiddle("VERTEX"),
+			want:     valueTo(ContainSubstring("Position of the vertex")),
+		},
+		{
+			name:     "ShaderTypeSky",
+			document: "shader_type sky;\n",
+			seek:     toMiddle("sky"),
+			want:     valueTo(ContainSubstring("Sky shader")),
+		},
+		{
+			name:     "ShaderTypeParticles",
+			document: "shader_type particles;\n",
+			seek:     toMiddle("particles"),
+			want:     valueTo(ContainSubstring("particle")),
 		},
 	}
 
@@ -103,17 +157,20 @@ func TestHandler_Hover(t *testing.T) {
 			result, err := h.Hover(t.Context(), lsp.HoverParams{
 				TextDocumentPositionParams: lsp.TextDocumentPositionParams{
 					TextDocument: lsp.TextDocumentIdentifier{URI: uri},
-					Position:     tt.position,
+					Position:     mustSeekPosition(t, tt.seek, tt.document),
 				},
 			})
 			g.Expect(err).ToNot(HaveOccurred(), "Hover error")
-
-			if tt.wantNil {
-				g.Expect(result).To(BeNil())
-			} else {
-				g.Expect(result).ToNot(BeNil())
-				g.Expect(result.Contents.Value).To(ContainSubstring(tt.wantContains))
-			}
+			g.Expect(result).To(tt.want)
 		})
 	}
+}
+
+func valueTo(m types.GomegaMatcher) types.GomegaMatcher {
+	return WithTransform(func(v any) any {
+		if hover, ok := v.(*lsp.Hover); ok && hover != nil {
+			return hover.Contents.Value
+		}
+		return nil
+	}, m)
 }

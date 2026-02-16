@@ -1,0 +1,5 @@
+Function,Description
+float **texture_sdf** (vec2 sdf_pos),Performs an SDF texture lookup.
+vec2 **texture_sdf_normal** (vec2 sdf_pos),Calculates a normal from the SDF texture.
+vec2 **sdf_to_screen_uv** (vec2 sdf_pos),Converts an SDF to screen UV.
+vec2 **screen_uv_to_sdf** (vec2 uv),Converts screen UV to an SDF.

@@ -1,0 +1,40 @@
+Built-in,Description
+in vec2 **VIEWPORT_SIZE**,Size of viewport (in pixels).
+in mat4 **VIEW_MATRIX**,World space to view space transform.
+in mat4 **INV_VIEW_MATRIX**,View space to world space transform.
+in mat4 **MAIN_CAM_INV_VIEW_MATRIX**,View space to world space transform of the camera used to draw the current viewport.
+in mat4 **INV_PROJECTION_MATRIX**,Clip space to view space transform.
+in vec3 **NODE_POSITION_WORLD**,"Node position, in world space."
+in vec3 **NODE_POSITION_VIEW**,"Node position, in view space."
+in vec3 **CAMERA_POSITION_WORLD**,"Camera position, in world space. Represents the midpoint of the two eyes when in multiview/stereo rendering."
+in vec3 **CAMERA_DIRECTION_WORLD**,"Camera direction, in world space."
+in uint **CAMERA_VISIBLE_LAYERS**,Cull layers of the camera rendering the current pass.
+in int **INSTANCE_ID**,Instance ID for instancing.
+in vec4 **INSTANCE_CUSTOM**,"Instance custom data (for particles, mostly)."
+in int **VIEW_INDEX**,"The view that we are rendering. ``VIEW_MONO_LEFT`` (``0``) for Mono (not multiview) or left eye, ``VIEW_RIGHT`` (``1``) for right eye."
+in int **VIEW_MONO_LEFT**,"Constant for Mono or left eye, always ``0``."
+in int **VIEW_RIGHT**,"Constant for right eye, always ``1``."
+in vec3 **EYE_OFFSET**,"Position offset for the eye being rendered, in view space. Only applicable for multiview rendering."
+inout vec3 **VERTEX**,"Position of the vertex, in model space. In world space if ``world_vertex_coords`` is used."
+in int **VERTEX_ID**,The index of the current vertex in the vertex buffer.
+inout vec3 **NORMAL**,Normal in model space. In world space if ``world_vertex_coords`` is used.
+inout vec3 **TANGENT**,Tangent in model space. In world space if ``world_vertex_coords`` is used.
+inout vec3 **BINORMAL**,Binormal in model space. In world space if ``world_vertex_coords`` is used.
+out vec4 **POSITION**,"If written to, overrides final vertex position in clip space."
+inout vec2 **UV**,UV main channel.
+inout vec2 **UV2**,UV secondary channel.
+inout vec4 **COLOR**,"Color from vertices. Limited to values between ``0.0`` and ``1.0`` for each channel and 8 bits per channel precision (256 possible levels). Alpha channel is supported. Values outside the allowed range are clamped, and values may be rounded due to precision limitations. Use ``CUSTOM0``-``CUSTOM3`` to pass data with more precision if needed."
+out float **ROUGHNESS**,Roughness for vertex lighting.
+inout float **POINT_SIZE**,Point size for point rendering.
+inout mat4 **MODELVIEW_MATRIX**,Model/local space to view space transform (use if possible).
+inout mat3 **MODELVIEW_NORMAL_MATRIX**,
+in mat4 **MODEL_MATRIX**,Model/local space to world space transform.
+in mat3 **MODEL_NORMAL_MATRIX**,
+inout mat4 **PROJECTION_MATRIX**,View space to clip space transform.
+in uvec4 **BONE_INDICES**,
+in vec4 **BONE_WEIGHTS**,
+in vec4 **CUSTOM0**,"Custom value from vertex primitive. When using extra UVs, ``xy`` is UV3 and ``zw`` is UV4."
+in vec4 **CUSTOM1**,"Custom value from vertex primitive. When using extra UVs, ``xy`` is UV5 and ``zw`` is UV6."
+in vec4 **CUSTOM2**,"Custom value from vertex primitive. When using extra UVs, ``xy`` is UV7 and ``zw`` is UV8."
+in vec4 **CUSTOM3**,Custom value from vertex primitive.
+out float **Z_CLIP_SCALE**,"If written to, scales the vertex towards the camera to avoid clipping into things like walls. Lighting and shadows will continue to work correctly when this is written to, but screen-space effects like SSAO and SSR may break with lower scales. Try to keep this value as close to ``1.0`` as possible."
