@@ -1,0 +1,2 @@
+Function,Description
+vec3 twice(vec3 v),Returns twice.

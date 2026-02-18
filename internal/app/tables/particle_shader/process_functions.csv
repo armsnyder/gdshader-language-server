@@ -1,2 +1,0 @@
-Function,Description
-"bool **emit_subparticle** (mat4 xform, vec3 velocity, vec4 color, vec4 custom, uint flags)",Emits a particle from a sub-emitter.

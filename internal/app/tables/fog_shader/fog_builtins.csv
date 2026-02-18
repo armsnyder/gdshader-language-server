@@ -1,9 +1,0 @@
-Built-in,Description
-in vec3 **WORLD_POSITION**,Position of current froxel cell in world space.
-in vec3 **OBJECT_POSITION**,Position of the center of the current :ref:`FogVolume <class_FogVolume>` in world space.
-in vec3 **UVW**,"3-dimensional UV, used to map a 3D texture to the current :ref:`FogVolume <class_FogVolume>`."
-in vec3 **SIZE**,Size of the current :ref:`FogVolume <class_FogVolume>` when its :ref:`shape<class_FogVolume_property_shape>` has a size.
-in vec3 **SDF**,"Signed distance field to the surface of the :ref:`FogVolume <class_FogVolume>`. Negative if inside volume, positive otherwise."
-out vec3 **ALBEDO**,"Output base color value, interacts with light to produce final color. Only written to fog volume if used."
-out float **DENSITY**,Output density value. Can be negative to allow subtracting one volume from another. Density must be used for fog shader to write anything at all.
-out vec3 **EMISSION**,"Output emission color value, added to color during light pass to produce final color. Only written to fog volume if used."

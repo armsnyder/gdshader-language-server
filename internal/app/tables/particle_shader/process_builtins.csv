@@ -1,6 +1,0 @@
-Built-in,Description
-in bool **RESTART**,``true`` if the current process frame is the first for the particle.
-in bool **COLLIDED**,``true`` when the particle has collided with a particle collider.
-in vec3 **COLLISION_NORMAL**,"A normal of the last collision. If there is no collision detected it is equal to ``(0.0, 0.0, 0.0)``."
-in float **COLLISION_DEPTH**,A length of the normal of the last collision. If there is no collision detected it is equal to ``0.0``.
-in vec3 **ATTRACTOR_FORCE**,A combined force of the attractors at the moment on that particle.

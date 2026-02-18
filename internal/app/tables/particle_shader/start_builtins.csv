@@ -1,6 +1,0 @@
-Built-in,Description
-in bool **RESTART_POSITION**,"``true`` if particle is restarted, or emitted without a custom position (i.e. this particle was created by ``emit_subparticle()`` without the ``FLAG_EMIT_POSITION`` flag)."
-in bool **RESTART_ROT_SCALE**,"``true`` if particle is restarted, or emitted without a custom rotation or scale (i.e. this particle was created by ``emit_subparticle()`` without the ``FLAG_EMIT_ROT_SCALE`` flag)."
-in bool **RESTART_VELOCITY**,"``true`` if particle is restarted, or emitted without a custom velocity (i.e. this particle was created by ``emit_subparticle()`` without the ``FLAG_EMIT_VELOCITY`` flag)."
-in bool **RESTART_COLOR**,"``true`` if particle is restarted, or emitted without a custom color (i.e. this particle was created by ``emit_subparticle()`` without the ``FLAG_EMIT_COLOR`` flag)."
-in bool **RESTART_CUSTOM**,"``true`` if particle is restarted, or emitted without a custom property (i.e. this particle was created by ``emit_subparticle()`` without the ``FLAG_EMIT_CUSTOM`` flag)."

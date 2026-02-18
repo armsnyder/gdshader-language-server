@@ -1,5 +1,0 @@
-Render mode,Description
-**keep_data**,Do not clear previous data on restart.
-**disable_force**,Disable attractor force.
-**disable_velocity**,Ignore ``VELOCITY`` value.
-**collision_use_scale**,Scale the particle's size for collisions.
