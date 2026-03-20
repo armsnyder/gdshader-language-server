@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/armsnyder/gdshader-language-server/compare/v0.6.0...v0.7.0) (2026-03-20)
+
+
+### Features
+
+* Basic hover implementation ([#64](https://github.com/armsnyder/gdshader-language-server/issues/64)) ([45ace0f](https://github.com/armsnyder/gdshader-language-server/commit/45ace0f78bb28138670e502904d8feca9ddd1b8f))
+
 ## [0.6.0](https://github.com/armsnyder/gdshader-language-server/compare/v0.5.0...v0.6.0) (2025-07-06)
 
 
