@@ -6,7 +6,7 @@ require (
 	github.com/alecthomas/participle/v2 v2.1.4
 	github.com/google/go-cmp v0.7.0
 	github.com/onsi/gomega v1.39.1
-	github.com/samber/lo v1.52.0
+	github.com/samber/lo v1.53.0
 	github.com/zyedidia/rope v0.0.0-20210616205215-37fbf22eab3a
 )
 
